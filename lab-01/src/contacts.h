@@ -15,9 +15,9 @@
 typedef char string_t[MAX_STR_SIZE];
 
 typedef struct {
-	string_t _name;
-	string_t _phone;
-	string_t _place;
+	string_t 	_name;
+	string_t 	_phone;
+	string_t 	_place;
 } contact_t;
 
 typedef struct {
@@ -30,10 +30,14 @@ void init(contacts_t* list);
 void print_one(contacts_t* list, int position);
 void print_all(contacts_t* list);
 
-int insert(contacts_t* list, string_t name, string_t phone, string_t place);
-int find_by_name(contacts_t* list, string_t name);
-int find_by_place(contacts_t* list, string_t place);
+void read_one(contact_t* contact);
+
+int insert(contacts_t* list, contact_t contact);
+int find_by_name(contacts_t* list, string_t name, int ini, int end);
+int find_by_place(contacts_t* list, string_t place, int ini, int end);
 int delete(contacts_t* list, string_t name);
+
+void chomp(char* str);
 
 
 #endif /* CONTACTS_H_ */
