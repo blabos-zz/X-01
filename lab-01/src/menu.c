@@ -9,6 +9,7 @@
 #include "contacts.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 
 void _menu_exit();
@@ -20,35 +21,41 @@ void _menu_list(contacts_t* list);
 void _menu_default(int option);
 
 
-void print_menu() {
+void print_menu(const contacts_t* list) {
 	printf("\n\nCC3651 - Exercicio de Laboratorio #1\n\n");
 	
-	printf("0 - Sair\n");
-	printf("1 - Inserir\n");
+	if (list->_length != MAX_LIST_SIZE) {
+		printf("1 - Inserir\n");
+	}
+	
 	printf("2 - Pesquisar por Nome\n");
 	printf("3 - Persquisar por Lugar\n");
-	printf("4 - Excluir\n");
+	
+	if (list->_length != 0) {
+		printf("4 - Excluir\n");
+	}
+	
 	printf("5 - Listar Todos\n");
+	printf("6 - Sair\n");
+	
+	printf("\nEstado da lista: %d/%d elemento(s) ocupado(s)\n",
+			count(list), MAX_LIST_SIZE);
 	
 	printf("\nSua opcao: ");
 }
 
 int read_option() {
 	string_t option;
+	char* ret;			// Only to suppress warnings.
 	
 	setbuf(stdin, 0);
-	fgets(option, MAX_STR_SIZE, stdin);
+	ret = fgets(option, MAX_STR_SIZE, stdin);
 	
 	return atoi(option);
 }
 
 void dispatch(contacts_t* list, int option) {
 	switch (option) {
-		case 0: {
-			_menu_exit();
-			break;
-		}
-		
 		case 1: {
 			_menu_insert(list);
 			break;
@@ -71,6 +78,12 @@ void dispatch(contacts_t* list, int option) {
 		
 		case 5: {
 			_menu_list(list);
+			break;
+		}
+		
+		
+		case 6: {
+			_menu_exit();
 			break;
 		}
 		
@@ -108,13 +121,14 @@ void _menu_insert(contacts_t* list) {
 
 void _menu_find_by_name(contacts_t* list) {
 	string_t name;
+	char* ret;			// Only to suppress warnings.
 	int pos;
 	
 	setbuf(stdin, 0);
 	printf("\n\nBusca por Nome\n\n");
 	
 	printf("Nome do contato: ");
-	fgets(name, MAX_STR_SIZE, stdin);
+	ret = fgets(name, MAX_STR_SIZE, stdin);
 	chomp(name);
 	
 	pos = find_by_name(list, name, 0, list->_length - 1);
@@ -130,13 +144,14 @@ void _menu_find_by_name(contacts_t* list) {
 
 void _menu_find_by_place(contacts_t* list) {
 	string_t place;
+	char* ret;			// Only to suppress warnings.
 	int pos;
 	
 	setbuf(stdin, 0);
 	printf("\n\nBusca por Lugar\n\n");
 	
 	printf("Lugar onde conheceu o contato: ");
-	fgets(place, MAX_STR_SIZE, stdin);
+	ret = fgets(place, MAX_STR_SIZE, stdin);
 	chomp(place);
 	
 	pos = find_by_place(list, place, 0, list->_length - 1);
@@ -152,13 +167,14 @@ void _menu_find_by_place(contacts_t* list) {
 
 void _menu_delete(contacts_t* list) {
 	string_t name;
+	char* ret;			// Only to suppress warnings;
 	int pos;
 	
 	setbuf(stdin, 0);
 	printf("\n\nExcluir\n\n");
 	
 	printf("Digite o nome do contato a excluir: ");
-	fgets(name, MAX_STR_SIZE, stdin);
+	ret = fgets(name, MAX_STR_SIZE, stdin);
 	chomp(name);
 	
 	pos = delete(list, name);

@@ -27,15 +27,18 @@ typedef struct {
 
 
 void init(contacts_t* list);
-void print_one(contacts_t* list, int position);
-void print_all(contacts_t* list);
+void print_one(const contacts_t* list, int position);
+void print_all(const contacts_t* list);
 
 void read_one(contact_t* contact);
 
 int insert(contacts_t* list, contact_t contact);
-int find_by_name(contacts_t* list, string_t name, int ini, int end);
-int find_by_place(contacts_t* list, string_t place, int ini, int end);
+int find_by_name(const contacts_t* list, string_t name, int ini, int end);
+int find_by_place(const contacts_t* list, string_t place, int ini, int end);
 int delete(contacts_t* list, string_t name);
+
+int count(const contacts_t* list);
+int elements_left(const contacts_t* list);
 
 void chomp(char* str);
 

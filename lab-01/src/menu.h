@@ -12,7 +12,7 @@
 #include "contacts.h"
 
 
-void print_menu();
+void print_menu(const contacts_t* list);
 int read_option();
 void dispatch(contacts_t* list, int option);
 

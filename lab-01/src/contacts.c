@@ -14,7 +14,7 @@
 /**
  * Private functions.
  */
-int _find_first_greater(contacts_t* list, string_t name);
+int _find_first_greater(const contacts_t* list, string_t name);
 void _inflate(contacts_t* list, int pos);
 void _deflate(contacts_t* list, int pos);
 
@@ -32,10 +32,10 @@ void init(contacts_t* list) {
 /**
  * Prints a contact on a given position.
  * 
- * @param contacts_t* A pointer to a list.
+ * @param const contacts_t* A pointer to a list.
  * @param contacts_t* A given position.
  */
-void print_one(contacts_t* list, int position) {
+void print_one(const contacts_t* list, int position) {
 	printf("Pos:      %02d\n", position);
 	printf("Nome:     %s\n",   list->_contacts[position]._name);
 	printf("Lugar:    %s\n",   list->_contacts[position]._place);
@@ -45,9 +45,9 @@ void print_one(contacts_t* list, int position) {
 /**
  * Prints all contacts.
  * 
- * @param contacts_t* A pointer to a list.
+ * @param const contacts_t* A pointer to a list.
  */
-void print_all(contacts_t* list) {
+void print_all(const contacts_t* list) {
 	int i;
 	
 	for (i = 0; i < list->_length; i++) {
@@ -62,17 +62,18 @@ void print_all(contacts_t* list) {
  */
 void read_one(contact_t* contact) {
 	setbuf(stdin, 0);
+	char* ret;			// Only to suppress warnings.
 	
 	printf("Nome:  ");
-	fgets(contact->_name,  MAX_STR_SIZE, stdin);
+	ret = fgets(contact->_name,  MAX_STR_SIZE, stdin);
 	chomp(contact->_name);
 	
 	printf("Lugar: ");
-	fgets(contact->_place, MAX_STR_SIZE, stdin);
+	ret = fgets(contact->_place, MAX_STR_SIZE, stdin);
 	chomp(contact->_place);
 	
 	printf("Tel:   ");
-	fgets(contact->_phone, MAX_STR_SIZE, stdin);
+	ret = fgets(contact->_phone, MAX_STR_SIZE, stdin);
 	chomp(contact->_phone);
 }
 
@@ -104,14 +105,14 @@ int insert(contacts_t* list, contact_t contact) {
 /**
  * Finds a contact by name.
  * 
- * @param contacts_t* A pointer to a list.
+ * @param const contacts_t* A pointer to a list.
  * @param string_t A name to find.
  * @param int Initial element's position within the list.
  * @param int Final element's position within the list.
  * 
  * @return int The element's position or -1 if cannot find.
  */
-int find_by_name(contacts_t* list, string_t name, int ini, int end) {
+int find_by_name(const contacts_t* list, string_t name, int ini, int end) {
 	int cmp, half;
 	if (ini > end) return -1;
 	
@@ -132,14 +133,14 @@ int find_by_name(contacts_t* list, string_t name, int ini, int end) {
 /**
  * Finds a contact by place.
  * 
- * @param contacts_t* A pointer to a list.
+ * @param const contacts_t* A pointer to a list.
  * @param string_t A place to find.
  * @param int Initial element's position within the list.
  * @param int Final element's position within the list.
  * 
  * @return int The element's position or -1 if cannot find.
  */
-int find_by_place(contacts_t* list, string_t place, int ini, int end) {
+int find_by_place(const contacts_t* list, string_t place, int ini, int end) {
 	int cmp, half;
 	if (ini > end) return -1;
 	
@@ -178,12 +179,12 @@ int delete(contacts_t* list, string_t name) {
  * Find the first element whose it name is alphabetically greater than the
  * given name.
  * 
- * @param contacts_t* A pointer to a list.
+ * @param const contacts_t* A pointer to a list.
  * @param string_t The given name.
  * 
  * @return int The element's position.
  */
-int _find_first_greater(contacts_t* list, string_t name ) {
+int _find_first_greater(const contacts_t* list, string_t name ) {
 	int index = 0;
 
 	if (list->_length <= 0) {
@@ -197,6 +198,28 @@ int _find_first_greater(contacts_t* list, string_t name ) {
 	}
 	
 	return index;
+}
+
+/**
+ * Returns the count of items into the list.
+ * 
+ * @param const contacts_t* A pointer to a list.
+ * 
+ * @return int Count of elements.
+ */
+int count(const contacts_t* list) {
+	return list->_length;
+}
+
+/**
+ * Returns the number of elements not used yet.
+ * 
+ * @param const contacts_t* A pointer to a list.
+ * 
+ * @return int The number of elements not used yet.
+ */
+int elements_left(const contacts_t* list) {
+	return MAX_LIST_SIZE - list->_length;
 }
 
 /**
