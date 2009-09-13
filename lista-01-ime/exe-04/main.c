@@ -2,7 +2,7 @@
  * main.c
  *
  *  Created on: Sep 13, 2009
- *      Author: wesley
+ *      Author: blabos
  *  
  *  4. Durante os 30 dias do mês de Fevereiro foram tomadas as temperaturas
  *  médias diárias de Euclides da Cunha (BA)(1). Determinar o número de dias
