@@ -12,7 +12,6 @@
  *  que tenha tido temperatura abaixo de zero desde a última era glacial.
  *  Indo para um exercício com enunciado melhor :)
  */
-#include <stdio.h>
 #include <stdlib.h>
 
 int main(void) {
