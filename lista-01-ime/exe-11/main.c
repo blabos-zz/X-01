@@ -18,6 +18,7 @@
 int is_triangular(int n) {
 	int i = 2;
 	int p = 0;
+	
 	while ((p = (i-1)*(i)*(i+1)) <= n) {
 		if (p == n) return 1;
 		i++;
@@ -27,7 +28,7 @@ int is_triangular(int n) {
 
 int main(void) {
 	char buffer[MAX_BUFF_SIZE];
-	int n, i, j, k, count;
+	int n;
 	
 	printf("Enter n: ");
 	fgets(buffer, MAX_BUFF_SIZE, stdin);
