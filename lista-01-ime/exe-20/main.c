@@ -11,20 +11,12 @@
 
 #define MAX_BUFF_SIZE 16
 
-void sort(int* a, int* b, int*c) {
+void sort(int* a, int* b) {
     int tmp;
     if (*a > *b) {
         tmp = *a;
         *a = *b;
         *b = tmp;
-        sort(a, b, c);
-    }
-    
-    if (*b > *c) {
-        tmp = *b;
-        *b = *c;
-        *c = tmp;
-        sort(a, b, c);
     }
 }
 
@@ -45,7 +37,9 @@ int main(void) {
 	fgets(buffer, MAX_BUFF_SIZE, stdin);
 	c = buffer != NULL ? atoi(buffer) : 0;
 	
-	sort(&a, &b, &c);
+	sort(&a, &b);
+	sort(&a, &c);
+	sort(&b, &c);
 	
 	printf("%d %d %d\n", a, b, c);
 	
