@@ -20,11 +20,11 @@ int main(void) {
 	char buffer[MAX_BUFF_SIZE];
 	int x, n;
 	
-	printf("Digite x: ");
+	printf("Enter x: ");
 	fgets(buffer, MAX_BUFF_SIZE, stdin);
 	x = buffer != NULL ? atoi(buffer) : 0;
 	
-	printf("Digite n: ");
+	printf("Enter n: ");
 	fgets(buffer, MAX_BUFF_SIZE, stdin);
 	n = buffer != NULL ? atoi(buffer) : 0;
 	n = (n >= 0) ? n : 0;
