@@ -6,6 +6,7 @@
  */
 #include "stock.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 
 stock_t*	_get_stock();
@@ -34,6 +35,16 @@ void stock_reload() {
 	stock->milk += _random(MIN_STOCK_RELOAD, MAX_STOCK_RELOAD);
 	stock->rice += _random(MIN_STOCK_RELOAD, MAX_STOCK_RELOAD);
 	stock->wine += _random(MIN_STOCK_RELOAD, MAX_STOCK_RELOAD);
+}
+
+void stock_show() {
+	stock_t* stock = _get_stock();
+	
+	printf("Bean: %3d\n", stock->bean);
+	printf("Corn: %3d\n", stock->corn);
+	printf("Milk: %3d\n", stock->milk);
+	printf("Rice: %3d\n", stock->rice);
+	printf("Wine: %3d\n", stock->wine);
 }
 
 int stock_rice() { return _get_stock()->rice; }
