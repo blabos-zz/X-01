@@ -10,6 +10,7 @@
 
 stock_t*	_get_stock();
 int			_random(int a, int b);
+int			_has_item(int* item, int quant);
 int			_request_item(int* item, int quant);
 
 
@@ -40,6 +41,28 @@ int stock_bean() { return _get_stock()->bean; }
 int stock_corn() { return _get_stock()->corn; }
 int stock_milk() { return _get_stock()->milk; }
 int stock_wine() { return _get_stock()->wine; }
+
+
+int stock_has_rice(int quant) {
+	return _has_item(&(_get_stock()->rice), quant);
+}
+
+int stock_has_bean(int quant) {
+	return _has_item(&(_get_stock()->bean), quant);
+}
+
+int stock_has_corn(int quant) {
+	return _has_item(&(_get_stock()->corn), quant);
+}
+
+int stock_has_milk(int quant) {
+	return _has_item(&(_get_stock()->milk), quant);
+}
+
+int stock_has_wine(int quant) {
+	return _has_item(&(_get_stock()->wine), quant);
+}
+
 
 int stock_request_rice(int quant) {
 	return _request_item(&(_get_stock()->rice), quant);
@@ -72,10 +95,16 @@ int _random(int a, int b) {
 	return a + (rand() % abs(1 + b - a));
 }
 
+int _has_item(int* item, int quant) {
+	quant = abs(quant);
+	
+	return (((*item) - quant) >= 0);
+}
+
 int _request_item(int* item, int quant) {
 	quant = abs(quant);
 	
-	if (((*item) - quant) >= 0) {
+	if (_has_item(item, quant)) {
 		(*item) -= quant;
 	}
 	else {

@@ -29,6 +29,12 @@ int stock_corn();
 int stock_milk();
 int stock_wine();
 
+int stock_has_rice(int quant);
+int stock_has_bean(int quant);
+int stock_has_corn(int quant);
+int stock_has_milk(int quant);
+int stock_has_wine(int quant);
+
 int stock_request_rice(int quant);
 int stock_request_bean(int quant);
 int stock_request_corn(int quant);
