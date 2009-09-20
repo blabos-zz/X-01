@@ -28,11 +28,11 @@ void stock_init() {
 void stock_reload() {
 	stock_t* stock = _get_stock();
 	
-	stock->bean += _random(50, 100);
-	stock->corn += _random(50, 100);
-	stock->milk += _random(50, 100);
-	stock->rice += _random(50, 100);
-	stock->wine += _random(50, 100);
+	stock->bean += _random(MIN_STOCK_RELOAD, MAX_STOCK_RELOAD);
+	stock->corn += _random(MIN_STOCK_RELOAD, MAX_STOCK_RELOAD);
+	stock->milk += _random(MIN_STOCK_RELOAD, MAX_STOCK_RELOAD);
+	stock->rice += _random(MIN_STOCK_RELOAD, MAX_STOCK_RELOAD);
+	stock->wine += _random(MIN_STOCK_RELOAD, MAX_STOCK_RELOAD);
 }
 
 int stock_rice() { return _get_stock()->rice; }

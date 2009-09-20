@@ -8,6 +8,9 @@
 #ifndef STOCK_H_
 #define STOCK_H_
 
+#define MIN_STOCK_RELOAD 50
+#define MAX_STOCK_RELOAD 100
+
 typedef struct {
 	int rice;
 	int bean;
