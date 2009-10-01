@@ -66,6 +66,7 @@ int request_order(order_list_t* list, order_t order) {
 			list->head->prev = node;
 			list->head = node;
 		}
+		list->size++;
 	}
 	
 	return (int)node;
@@ -86,6 +87,8 @@ int attend_order(order_list_t* list, order_t* order) {
 		order->next = order->prev = NULL;
 		
 		_remove_order(list, node);
+		list->size--;
+		
 		retval = 1;
 	}
 	

@@ -1,39 +1,9 @@
-<<<<<<< HEAD:lab-02/src/main.c
-#include <sl_list.h>
-#include <stdlib.h>
-
-int main(void) {
-    list_t* list = sll_new();
-    
-    sll_insert(list, 1);
-    sll_insert(list, 2);
-    sll_insert(list, 3);
-    sll_print(list);
-    
-    sll_delete(list);
-    sll_delete(list);
-    sll_delete(list);
-    sll_delete(list);
-    sll_print(list);
-    
-    sll_insert(list, 11);
-    sll_insert(list, 12);
-    sll_insert(list, 13);
-    sll_print(list);
-    
-    sll_del(list);
-
-    return 0;
-}
-
-=======
 /*
  * main.c
  *
  *  Created on: Sep 19, 2009
  *      Author: blabos
  */
-//#include "stock.h"
 #include "orders.h"
 
 #include <stdio.h>
@@ -98,4 +68,4 @@ int main(void) {
 	del_order_list(list);
 	return EXIT_SUCCESS;
 }
->>>>>>> 50fa329fabc392667e2eac91282a09b1762400db:lab-02/src/main.c
+
