@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
 order_t*	_new_order(const order_t* order);
 void		_del_order(order_t* order);
 
@@ -19,6 +20,12 @@ int			_can_attend(const order_t* order);
 order_t*	_orders_begin(const order_list_t* list);
 order_t*	_orders_end(const order_list_t* list);
 
+
+/**
+ * Cria uma nova lista de pedidos.
+ * 
+ * @return order_list_t* Um ponteiro para a nova lista de pedidos.
+ */
 order_list_t* new_order_list() {
 	order_list_t* list = (order_list_t*)malloc(sizeof(order_list_t));
 	
@@ -27,10 +34,26 @@ order_list_t* new_order_list() {
 	return list;
 }
 
+/**
+ * Destrói uma lista de pedidos. Primeiro remove todos os elementos restantes,
+ * depois libera a memória ocupada pala própria lista.
+ * 
+ * @param order_list_t* Um ponteiro para a lista a ser destruída.
+ */
 void del_order_list(order_list_t* list) {
+	order_t* it;
+	for (it = _orders_begin(list); it != _orders_end(list); it = it->next) {
+		_remove_order(list, it);
+	}
+	
 	free(list);
 }
 
+/**
+ * Imprime a lista de pedidos em formato de debug.
+ * 
+ * @param const order_list_t* Um ponteiro para a lista de pedidos.
+ */
 void print_order_list(const order_list_t* list) {
 	printf("Head: %10p\n", list->head);
 	printf("Tail: %10p\n", list->tail);
@@ -47,6 +70,14 @@ void print_order_list(const order_list_t* list) {
 	}
 }
 
+/**
+ * Armazena um pedido com uma dada quantidade de itens na fila de pedidos.
+ * 
+ * @param order_list_t* Um ponteiro para a lista de pedidos.
+ * @param order_t O pedido a ser enfileirado.
+ * 
+ * @return int 1 se conseguiu inserir com sucesso ou zero se falhou.
+ */
 int request_order(order_list_t* list, order_t order) {
 	order_t* node = _new_order(&order);
 	
@@ -69,9 +100,17 @@ int request_order(order_list_t* list, order_t order) {
 		list->size++;
 	}
 	
-	return (int)node;
+	return (int)node != 0;
 }
 
+/**
+ * Tenta atender a um pedido.
+ * 
+ * @param order_list_t* Um ponteiro para a lista de pedidos.
+ * @param order_t* Um ponteiro para retornar o pedido atendido, se aplicável.
+ * 
+ * @return int 1 se conseguiu atender ou 0 caso contrário.
+ */
 int attend_order(order_list_t* list, order_t* order) {
 	int retval = 0;
 	order_t* node;
@@ -95,6 +134,17 @@ int attend_order(order_list_t* list, order_t* order) {
 	return retval;
 }
 
+/****************************************************************************/
+/****************************************************************************/
+
+/**
+ * Tenta criar uma cópia de um pedido.
+ * 
+ * @param const order_t* O pedido original.
+ * 
+ * @return order_t* Um ponteiro para a cópia. Em caso de falha este ponteiro
+ * será nulo.
+ */
 order_t* _new_order(const order_t* order) {
 	order_t* node = (order_t*)malloc(sizeof(order_t));
 	
@@ -106,10 +156,20 @@ order_t* _new_order(const order_t* order) {
 	return node;
 }
 
+/**
+ * Destrói um pedido.
+ * 
+ * @param order_t* Um ponteiro para o pedido a ser destruído.
+ */
 void _del_order(order_t* order) {
 	free(order);
 }
 
+/**
+ * Imprime um pedido em formato de debug.
+ * 
+ * @param const order_t* Um ponteiro para o pedido a ser impresso.
+ */
 void print_order(const order_t* order) {
 	printf("%10p <- %10p -> %10p: {%3d, %3d, %3d, %3d, %3d}\n",
 				order->prev, order, order->next,
@@ -120,6 +180,12 @@ void print_order(const order_t* order) {
 				order->data.wine);
 }
 
+/**
+ * Remove um pedido da lista de pedidos e desaloca a memória ocupada por ele.
+ * 
+ * @param order_list_t* Um ponteiro para a lista de pedidos.
+ * @param order_t* Um ponteiro para o pedido a ser removido da lista.
+ */
 void _remove_order(order_list_t* list, order_t* order) {
 	if (list->head == list->tail) {
 		list->head = list->tail = NULL;
@@ -140,6 +206,15 @@ void _remove_order(order_list_t* list, order_t* order) {
 	_del_order(order);
 }
 
+/**
+ * Procura na lista de pedidos o primeiro pedido que puder ser atendido pelo
+ * atual estoque.
+ * 
+ * @param order_list_t* Um ponteiro para a lista de pedidos.
+ * 
+ * @return order_t* Um ponteiro para o pedido a ser atendido, ou NULL caso
+ * nenhum pedido possa ser atendido no momento.
+ */
 order_t* _find_attendable_order(order_list_t* list) {
 	order_t* it;
 	
@@ -152,6 +227,13 @@ order_t* _find_attendable_order(order_list_t* list) {
 	return NULL;
 }
 
+/**
+ * Checa se dado pedido pose ser atendido pelo estoque atual.
+ * 
+ * @param const order_t* Um ponteiro para o pedido.
+ * 
+ * @return int 1 se o pedido possa ser atendido ou 0 caso contrário.
+ */
 int _can_attend(const order_t* order) {
 	return (stock_has_bean(order->data.bean) &&
 			stock_has_corn(order->data.corn) &&
@@ -160,10 +242,26 @@ int _can_attend(const order_t* order) {
 			stock_has_wine(order->data.wine));
 }
 
+/**
+ * Retorna o primeiro elemento da lista.
+ * 
+ * @param const order_list_t* Um ponteiro para a lista de pedidos.
+ * 
+ * @return order_t* Um ponteiro para o primeiro elemento. Caso a lista esteja
+ * vazia, retorna NULL.
+ */
 order_t* _orders_begin(const order_list_t* list) {
 	return list->head;
 }
 
+/**
+ * Retorna o último elemento da lista.
+ * 
+ * @param const order_list_t* Um ponteiro para a lista de pedidos.
+ * 
+ * @return order_t* Um ponteiro para o último elemento. Caso a lista esteja
+ * vazia, retorna NULL.
+ */
 order_t* _orders_end(const order_list_t* list) {
 	return list-> tail ? list->tail->next: NULL;
 }
