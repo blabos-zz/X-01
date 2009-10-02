@@ -1,22 +1,27 @@
 /*
  * main.c
  *
- *  Created on: Sep 19, 2009
+ *  Created on: Oct 2, 2009
  *      Author: blabos
  */
+#include "interface.h"
 #include "orders.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 
 int main(void) {
-	order_list_t* list = new_order_list();
-	stock_init();
-	stock_reload();
+	int option = 0;
 	
-	print_order_list(list);
+	order_list_t* orders = new_order_list();
 	
-	del_order_list(list);
+	do {
+		print_menu();
+		option = read_option();
+		dispatch(orders, option);
+	} while (option != MENU_EXIT);
+	
+	del_order_list(orders);
 	return EXIT_SUCCESS;
 }
+
 

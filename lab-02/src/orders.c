@@ -17,9 +17,6 @@ void		_remove_order(order_list_t* list, order_t* order);
 order_t*	_find_attendable_order(order_list_t* list);
 int			_can_attend(const order_t* order);
 
-order_t*	_orders_begin(const order_list_t* list);
-order_t*	_orders_end(const order_list_t* list);
-
 
 /**
  * Cria uma nova lista de pedidos.
@@ -42,7 +39,7 @@ order_list_t* new_order_list() {
  */
 void del_order_list(order_list_t* list) {
 	order_t* it;
-	for (it = _orders_begin(list); it != _orders_end(list); it = it->next) {
+	for (it = orders_begin(list); it != orders_end(list); it = it->next) {
 		_remove_order(list, it);
 	}
 	
@@ -59,13 +56,13 @@ void print_order_list(const order_list_t* list) {
 	printf("Tail: %10p\n", list->tail);
 	printf("Size: %10d\n", list->size);
 	
-	order_t* it = _orders_begin(list);
+	order_t* it = orders_begin(list);
 	
 	if (it) {
 		printf("Data: \n\n");
 	}
 	
-	for (it = _orders_begin(list); it != _orders_end(list); it = it->next) {
+	for (it = orders_begin(list); it != orders_end(list); it = it->next) {
 		print_order(it);
 	}
 }
@@ -132,6 +129,30 @@ int attend_order(order_list_t* list, order_t* order) {
 	}
 	
 	return retval;
+}
+
+/**
+ * Retorna o primeiro elemento da lista.
+ * 
+ * @param const order_list_t* Um ponteiro para a lista de pedidos.
+ * 
+ * @return order_t* Um ponteiro para o primeiro elemento. Caso a lista esteja
+ * vazia, retorna NULL.
+ */
+order_t* orders_begin(const order_list_t* list) {
+	return list->head;
+}
+
+/**
+ * Retorna o último elemento da lista.
+ * 
+ * @param const order_list_t* Um ponteiro para a lista de pedidos.
+ * 
+ * @return order_t* Um ponteiro para o último elemento. Caso a lista esteja
+ * vazia, retorna NULL.
+ */
+order_t* orders_end(const order_list_t* list) {
+	return list->tail ? list->tail->next : NULL;
 }
 
 /****************************************************************************/
@@ -218,7 +239,7 @@ void _remove_order(order_list_t* list, order_t* order) {
 order_t* _find_attendable_order(order_list_t* list) {
 	order_t* it;
 	
-	for (it = _orders_begin(list); it != _orders_end(list); it = it->next) {
+	for (it = orders_begin(list); it != orders_end(list); it = it->next) {
 		if (_can_attend(it)) {
 			return it;
 		}
@@ -242,26 +263,3 @@ int _can_attend(const order_t* order) {
 			stock_has_wine(order->data.wine));
 }
 
-/**
- * Retorna o primeiro elemento da lista.
- * 
- * @param const order_list_t* Um ponteiro para a lista de pedidos.
- * 
- * @return order_t* Um ponteiro para o primeiro elemento. Caso a lista esteja
- * vazia, retorna NULL.
- */
-order_t* _orders_begin(const order_list_t* list) {
-	return list->head;
-}
-
-/**
- * Retorna o último elemento da lista.
- * 
- * @param const order_list_t* Um ponteiro para a lista de pedidos.
- * 
- * @return order_t* Um ponteiro para o último elemento. Caso a lista esteja
- * vazia, retorna NULL.
- */
-order_t* _orders_end(const order_list_t* list) {
-	return list-> tail ? list->tail->next: NULL;
-}

@@ -40,11 +40,11 @@ void stock_reload() {
 void stock_show() {
 	stock_t* stock = _get_stock();
 	
-	printf("Bean: %3d\n", stock->bean);
-	printf("Corn: %3d\n", stock->corn);
-	printf("Milk: %3d\n", stock->milk);
-	printf("Rice: %3d\n", stock->rice);
-	printf("Wine: %3d\n", stock->wine);
+	printf("Arroz:  %3d\n", stock->rice);
+	printf("Feijão: %3d\n", stock->bean);
+	printf("Milho:  %3d\n", stock->corn);
+	printf("Leite:  %3d\n", stock->milk);
+	printf("Vinho:  %3d\n", stock->wine);
 }
 
 int stock_rice() { return _get_stock()->rice; }

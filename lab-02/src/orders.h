@@ -34,6 +34,9 @@ void			print_order(const order_t* order);
 int				request_order(order_list_t* list, order_t order);
 int				attend_order(order_list_t* list, order_t* order);
 
+order_t*	    orders_begin(const order_list_t* list);
+order_t*	    orders_end(const order_list_t* list);
+
 
 
 
