@@ -20,6 +20,7 @@ typedef struct {
 } stock_t;
 
 
+void stock_load(int bean, int corn, int milk, int rice, int wine);
 void stock_init();
 void stock_reload();
 void stock_show();
@@ -41,6 +42,8 @@ int stock_request_corn(int quant);
 int stock_request_milk(int quant);
 int stock_request_rice(int quant);
 int stock_request_wine(int quant);
+
+
 
 
 #endif /* STOCK_H_ */

@@ -23,19 +23,26 @@ void _menu_save(const order_list_t* orders);
 void _menu_load(order_list_t* orders);
 void _menu_exit();
 
+void _print_order(const order_t* order);
+
+void _print_blank();
+void _wait();
+
 
 void print_menu() {
+	_print_blank();
+	
 	printf("\n\nCC3651 - Exercicio de Laboratorio #2\n\n");
-	printf("1 - Resumo\n");
-	printf("2 - Fazer Pedido\n");
-	printf("3 - Atender Pedidos\n");
-	printf("4 - Procurar Pedido\n");
-	printf("5 - Listar Pedidos\n");
-	printf("6 - Mostrar Estoque\n");
-	printf("7 - Reabastecer Estoque\n");
-	printf("8 - Salvar Dados\n");
-	printf("9 - Carregar Dados\n");
-	printf("0 - Sair\n");
+	printf(" 1 - Resumo\n");
+	printf(" 2 - Fazer Pedido\n");
+	printf(" 3 - Atender Pedidos\n");
+	printf(" 4 - Procurar Pedido\n");
+	printf(" 5 - Listar Pedidos\n");
+	printf(" 6 - Mostrar Estoque\n");
+	printf(" 7 - Reabastecer Estoque\n");
+	printf(" 8 - Salvar Dados\n");
+	printf(" 9 - Carregar Dados\n");
+	printf("10 - Sair\n");
 	
 	printf("\nSua opcao: ");
 }
@@ -96,7 +103,7 @@ void dispatch(order_list_t* orders, int option) {
 			break;
 		}
 		
-		case 0: {
+		case 10: {
 			_menu_exit();
 			break;
 		}
@@ -108,18 +115,23 @@ void dispatch(order_list_t* orders, int option) {
 }
 
 void _menu_status(order_list_t* orders) {
-    printf("Resumo das operações:\n");
+	_print_blank();
+	
+    printf("Resumo Operacional:\n\n");
     
     printf("Pedidos pendentes: %03d\n", orders->size);
     
-    printf("Estoque Atual:\n");
+    printf("Estoque Atual:\n\n");
     stock_show();
+    
+    _wait();
 }
 
 void _menu_send_order(order_list_t* orders) {
     order_t order;
     int code;
 	
+    _print_blank();
     printf("Gerando pedido. Digite as quantidades de cada ingrediente:\n");
     
     printf("Arroz:  ");
@@ -143,35 +155,42 @@ void _menu_send_order(order_list_t* orders) {
     else {
         printf("Falha ao inserir pedido.\n");
     }
+    
+    _wait();
 }
 
 void _menu_show_all(order_list_t* orders) {
-    printf("Mostrando pedidos:\n");
+	
+	_print_blank();
+    printf("Mostrando %03d pedidos:\n", orders->size);
     
     order_t* it;
-    for (it = orders->tail; it != orders->head->prev; it = it->prev) {
-        printf("\nPedido %03d:\n", it->code);
-        printf("Arroz:  %3d\n", it->data.rice);
-        printf("Feijão: %3d\n", it->data.bean);
-        printf("Milho:  %3d\n", it->data.corn);
-        printf("Leite:  %3d\n", it->data.milk);
-        printf("Vinho:  %3d\n", it->data.wine);
+    for (it = orders->tail; it && (it != orders->head->prev); it = it->prev) {
+        _print_order(it);
     }
+    
+    _wait();
 }
 
 void _menu_attend_orders(order_list_t* orders) {
-    order_t order;
+	order_t order;
+	
+	_print_blank();
     
     printf("Atendendo pedidos:\n");
     
     while (attend_order(orders, &order)) {
-        printf("Arroz:  %03d\n", order.data.rice);
+        _print_order(&order);
     }
+    
+    _wait();
 }
 
 void _menu_find(order_list_t* orders) {
     order_t* order = NULL;
     unsigned code = 0;
+    
+    _print_blank();
     
     printf("Procurando Pedido:\n");
     
@@ -179,43 +198,88 @@ void _menu_find(order_list_t* orders) {
     code = read_option();
     if (order = find(orders, code)) {
         printf("Pedido encontrado:\n");
-        printf("\nPedido %03d:\n", order->code);
-        printf("Arroz:  %3d\n", order->data.rice);
-        printf("Feijão: %3d\n", order->data.bean);
-        printf("Milho:  %3d\n", order->data.corn);
-        printf("Leite:  %3d\n", order->data.milk);
-        printf("Vinho:  %3d\n", order->data.wine);
+        _print_order(order);
     }
     else {
         printf("Pedido não encontrado.\n");
     }
+    
+    _wait();
 }
 
 void _menu_show_stock() {
+	_print_blank();
+	
     printf("Mostrando Estoque:\n");
+    
     stock_show();
+    
+    _wait();
 }
 
 void _menu_reload_stock() {
+	_print_blank();
+	
     printf("Reabastecendo Estoque...\n");
     stock_reload();
     stock_show();
+    
+    _wait();
 }
 
 void _menu_exit() {
+	_print_blank();
+	
 	printf("\nEncerrando aplicacao\n\n");
 }
 
 void _menu_save(const order_list_t* orders) {
-    printf("Salvando dados\n");    
+	
+	_print_blank();
+	
+    printf("Salvando dados\n");
+    
+    save(orders, "restaurant.bin");
+    
+    _wait();
 }
 
 void _menu_load(order_list_t* orders) {
+	
+	_print_blank();
+	
     printf("carregando dados\n");
+    
+    load(orders, "restaurant.bin");
+    
+    _wait();
 }
 
 void _menu_default(int option) {
-	printf("\n\nOpcao %d invalida. Tente alguma disponivel no Menu!\n\n",
+	
+	_print_blank();
+	
+	printf("\n\nOpcao %d inválida. Tente alguma disponível no Menu!\n\n",
 			option);
+	
+	_wait();
 }
 
+void _print_order(const order_t* order) {
+	printf("\nPedido %03d:\n", order->code);
+	printf("Arroz:  %3d  ", order->data.rice);
+	printf("Feijão: %3d  ", order->data.bean);
+	printf("Milho:  %3d  ", order->data.corn);
+	printf("Leite:  %3d  ", order->data.milk);
+	printf("Vinho:  %3d\n", order->data.wine);
+}
+
+void _print_blank() {
+	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+}
+
+void _wait() {
+	char c[2];
+	printf("Pressione ENTER para continuar");
+	fgets(c, 2, stdin);
+}

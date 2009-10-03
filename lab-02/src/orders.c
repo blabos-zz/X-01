@@ -170,6 +170,13 @@ order_t* orders_end(const order_list_t* list) {
 	return list->tail ? list->tail->next : NULL;
 }
 
+unsigned get_curr_code() {
+	return *(_internal_code());
+}
+void set_curr_code(unsigned code) {
+	(*(_internal_code())) = code;
+}
+
 /****************************************************************************/
 /****************************************************************************/
 

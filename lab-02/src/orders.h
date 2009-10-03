@@ -36,6 +36,9 @@ int				request_order(order_list_t* list, order_t order);
 int				attend_order(order_list_t* list, order_t* order);
 order_t*        find(const order_list_t* list, unsigned code);
 
+unsigned		get_curr_code();
+void			set_curr_code(unsigned code);
+
 order_t*	    orders_begin(const order_list_t* list);
 order_t*	    orders_end(const order_list_t* list);
 

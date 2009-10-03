@@ -15,6 +15,16 @@ int			_has_item(int* item, int quant);
 int			_request_item(int* item, int quant);
 
 
+void stock_load(int bean, int corn, int milk, int rice, int wine) {
+	stock_t* stock = _get_stock();
+	
+	stock->bean = bean;
+	stock->corn = corn;
+	stock->milk = milk;
+	stock->rice = rice;
+	stock->wine = wine;
+}
+
 void stock_init() {
 	stock_t* stock = _get_stock();
 	
