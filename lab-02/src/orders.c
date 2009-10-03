@@ -13,6 +13,9 @@
 order_t*	_new_order(const order_t* order);
 void		_del_order(order_t* order);
 
+unsigned*   _internal_code();
+unsigned    _next_code();
+
 void		_remove_order(order_list_t* list, order_t* order);
 order_t*	_find_attendable_order(order_list_t* list);
 int			_can_attend(const order_t* order);
@@ -76,6 +79,8 @@ void print_order_list(const order_list_t* list) {
  * @return int 1 se conseguiu inserir com sucesso ou zero se falhou.
  */
 int request_order(order_list_t* list, order_t order) {
+    int retval = 0;
+    
 	order_t* node = _new_order(&order);
 	
 	if (node) {
@@ -95,9 +100,10 @@ int request_order(order_list_t* list, order_t order) {
 			list->head = node;
 		}
 		list->size++;
+		retval = node->code;
 	}
 	
-	return (int)node != 0;
+	return retval;
 }
 
 /**
@@ -131,6 +137,15 @@ int attend_order(order_list_t* list, order_t* order) {
 	return retval;
 }
 
+order_t* find(const order_list_t* list, unsigned code) {
+    order_t* it = NULL;
+	for (it = orders_begin(list); it != orders_end(list); it = it->next) {
+		if (it->code == code) break;
+	}
+	
+	return it;
+}
+
 /**
  * Retorna o primeiro elemento da lista.
  * 
@@ -159,6 +174,22 @@ order_t* orders_end(const order_list_t* list) {
 /****************************************************************************/
 
 /**
+ *
+ */
+unsigned* _internal_code() {
+    static unsigned _code = 0;
+    
+    return &_code;
+}
+
+/**
+ *
+ */
+unsigned _next_code() {
+    return ++(*_internal_code());
+}
+
+/**
  * Tenta criar uma cópia de um pedido.
  * 
  * @param const order_t* O pedido original.
@@ -171,6 +202,7 @@ order_t* _new_order(const order_t* order) {
 	
 	if (node) {
 		(*node) = (*order);
+		node->code = _next_code();
 		node->next = node->prev = NULL;
 	}
 	

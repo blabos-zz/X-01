@@ -12,6 +12,7 @@
 typedef stock_t order_item_t;
 
 struct order_st {
+    unsigned            code;
 	order_item_t		data;
 	struct order_st*	next;
 	struct order_st*	prev;
@@ -33,6 +34,7 @@ void			print_order(const order_t* order);
 
 int				request_order(order_list_t* list, order_t order);
 int				attend_order(order_list_t* list, order_t* order);
+order_t*        find(const order_list_t* list, unsigned code);
 
 order_t*	    orders_begin(const order_list_t* list);
 order_t*	    orders_end(const order_list_t* list);

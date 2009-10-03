@@ -11,7 +11,7 @@
 #include "orders.h"
 
 
-#define MENU_EXIT 9
+#define MENU_EXIT 0
 
 
 void print_menu();
