@@ -9,12 +9,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+unsigned*   _internal_code();
+
 
 order_t*	_new_order(const order_t* order);
 void		_del_order(order_t* order);
+void		_clear(order_list_t* list);
 
-unsigned*   _internal_code();
-unsigned    _next_code();
 
 void		_remove_order(order_list_t* list, order_t* order);
 order_t*	_find_attendable_order(order_list_t* list);
@@ -41,10 +42,7 @@ order_list_t* new_order_list() {
  * @param order_list_t* Um ponteiro para a lista a ser destruída.
  */
 void del_order_list(order_list_t* list) {
-	order_t* it;
-	for (it = orders_begin(list); it != orders_end(list); it = it->next) {
-		_remove_order(list, it);
-	}
+	_clear(list);
 	
 	free(list);
 }
@@ -173,8 +171,121 @@ order_t* orders_end(const order_list_t* list) {
 unsigned get_curr_code() {
 	return *(_internal_code());
 }
-void set_curr_code(unsigned code) {
+
+void set_last_code(unsigned code) {
 	(*(_internal_code())) = code;
+}
+
+unsigned get_next_code() {
+    return ++(*_internal_code());
+}
+
+int save(const order_list_t* list, char* filename) {
+	FILE* fp;
+	
+	if ((fp = fopen(filename, "wb")) != NULL) {
+		
+		{
+			int value = 0;
+			
+			value = stock_bean();
+			fwrite((const void*)&(value), sizeof(int), 1, fp);
+			
+			value = stock_corn();
+			fwrite((const void*)&(value), sizeof(int), 1, fp);
+			
+			value = stock_milk();
+			fwrite((const void*)&(value), sizeof(int), 1, fp);
+			
+			value = stock_rice();
+			fwrite((const void*)&(value), sizeof(int), 1, fp);
+			
+			value = stock_wine();
+			fwrite((const void*)&(value), sizeof(int), 1, fp);
+			
+			printf("Salvando estoque.\n");
+			stock_show();
+		}
+		
+		{
+			unsigned value;
+			order_t* it;
+			
+			value = get_curr_code();
+			fwrite((const void*)&(value), sizeof(unsigned), 1, fp);
+			
+			printf("Último código de pedido: %03d.\n", get_curr_code());
+			
+			for (it = list->tail; it && (it != list->head->prev);
+					it = it->prev) {
+				fwrite((const void*)&(it->data), sizeof(order_item_t), 1, fp);
+				fwrite((const void*)&(it->code), sizeof(unsigned), 1, fp);
+			}
+			
+			printf("\nCarregando %03d pedidos.\n", list->size);
+		}
+		
+		fclose(fp);
+	}
+}
+
+
+int load(order_list_t* list, char* filename) {
+	FILE* fp;
+	
+	int value = 0;
+	
+	if ((fp = fopen(filename, "rb")) != NULL) {
+		
+		{
+			int bean = 0;
+			int corn = 0;
+			int milk = 0;
+			int rice = 0;
+			int wine = 0;
+			
+			fread(&bean, sizeof(int), 1, fp);
+			fread(&corn, sizeof(int), 1, fp);
+			fread(&milk, sizeof(int), 1, fp);
+			fread(&rice, sizeof(int), 1, fp);
+			fread(&wine, sizeof(int), 1, fp);
+			
+			stock_load(bean, corn, milk, rice, wine);
+			printf("Carregando estoque.\n");
+			stock_show();
+		}
+		
+		{
+			unsigned last_code, item_code, count;
+			order_t order;
+			
+			last_code = 0;
+			fread(&last_code, sizeof(unsigned), 1, fp);
+			
+			_clear(list);
+			
+			count = 0;
+			while (fread(&(order.data), sizeof(order_item_t), 1, fp)) {
+				if (!fread(&(item_code), sizeof(unsigned), 1, fp)) {
+					item_code = 0;
+				}
+				
+				++count;
+				order.code = item_code;
+				request_order(list, order);
+			}
+			
+			printf("\nCarregando %03d pedidos.\n", count);
+			
+			
+			set_last_code(last_code);
+			printf("Último código de pedido: %03d.\n", get_curr_code());
+			
+			printf("Dados carregados com sucesso.\n");
+		}
+		
+		fclose(fp);
+	}
 }
 
 /****************************************************************************/
@@ -190,13 +301,6 @@ unsigned* _internal_code() {
 }
 
 /**
- *
- */
-unsigned _next_code() {
-    return ++(*_internal_code());
-}
-
-/**
  * Tenta criar uma cópia de um pedido.
  * 
  * @param const order_t* O pedido original.
@@ -209,7 +313,6 @@ order_t* _new_order(const order_t* order) {
 	
 	if (node) {
 		(*node) = (*order);
-		node->code = _next_code();
 		node->next = node->prev = NULL;
 	}
 	
@@ -278,7 +381,7 @@ void _remove_order(order_list_t* list, order_t* order) {
 order_t* _find_attendable_order(order_list_t* list) {
 	order_t* it;
 	
-	for (it = orders_begin(list); it != orders_end(list); it = it->next) {
+	for (it = list->tail; it && (it != list->head->prev); it = it->prev) {
 		if (_can_attend(it)) {
 			return it;
 		}
@@ -302,3 +405,9 @@ int _can_attend(const order_t* order) {
 			stock_has_wine(order->data.wine));
 }
 
+void _clear(order_list_t* list) {
+	order_t* it;
+	for (it = orders_begin(list); it != orders_end(list); it = it->next) {
+		_remove_order(list, it);
+	}
+}

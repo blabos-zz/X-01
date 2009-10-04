@@ -129,10 +129,11 @@ void _menu_status(order_list_t* orders) {
 
 void _menu_send_order(order_list_t* orders) {
     order_t order;
-    int code;
+    int code = get_next_code();
 	
     _print_blank();
-    printf("Gerando pedido. Digite as quantidades de cada ingrediente:\n");
+    printf("Digite as quantidades de cada ingrediente para o pedido %03d:\n",
+    		code);
     
     printf("Arroz:  ");
     order.data.rice = abs(read_option());
@@ -148,6 +149,8 @@ void _menu_send_order(order_list_t* orders) {
     
     printf("Vinho:  ");
     order.data.wine = abs(read_option());
+    
+    order.code = code;
     
     if (code = request_order(orders, order)) {
         printf("Pedido %03d inserido com sucesso.\n", code);
@@ -174,13 +177,22 @@ void _menu_show_all(order_list_t* orders) {
 
 void _menu_attend_orders(order_list_t* orders) {
 	order_t order;
+	int count = 0;
 	
 	_print_blank();
     
     printf("Atendendo pedidos:\n");
     
     while (attend_order(orders, &order)) {
+    	++count;
         _print_order(&order);
+    }
+    
+    if (count) {
+    	printf("\nForam atendidos %03d pedidos.\n", count);
+    }
+    else {
+    	printf("\nNão foi possível atender nenhum pedido.\n");
     }
     
     _wait();
@@ -230,14 +242,14 @@ void _menu_reload_stock() {
 void _menu_exit() {
 	_print_blank();
 	
-	printf("\nEncerrando aplicacao\n\n");
+	printf("\nEncerrando aplicação\n\n");
 }
 
 void _menu_save(const order_list_t* orders) {
 	
 	_print_blank();
 	
-    printf("Salvando dados\n");
+    printf("Salvando dados.\n");
     
     save(orders, "restaurant.bin");
     
@@ -248,7 +260,7 @@ void _menu_load(order_list_t* orders) {
 	
 	_print_blank();
 	
-    printf("carregando dados\n");
+    printf("Carregando dados.\n");
     
     load(orders, "restaurant.bin");
     
@@ -259,7 +271,7 @@ void _menu_default(int option) {
 	
 	_print_blank();
 	
-	printf("\n\nOpcao %d inválida. Tente alguma disponível no Menu!\n\n",
+	printf("\n\nOpção %d inválida. Tente alguma disponível no Menu!\n\n",
 			option);
 	
 	_wait();
