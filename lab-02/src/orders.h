@@ -40,8 +40,8 @@ unsigned		get_next_code();
 unsigned		get_curr_code();
 void			set_last_code(unsigned code);
 
-int save(const order_list_t* list, char* filename);
-int load(order_list_t* list, char* filename);
+void save(const order_list_t* list, char* filename);
+void load(order_list_t* list, char* filename);
 
 order_t*	    orders_begin(const order_list_t* list);
 order_t*	    orders_end(const order_list_t* list);

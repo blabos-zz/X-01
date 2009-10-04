@@ -135,6 +135,15 @@ int attend_order(order_list_t* list, order_t* order) {
 	return retval;
 }
 
+/**
+ * Procura um pedido a partir do seu código.
+ * 
+ * @param const order_list_t* Um ponteiro para a lista.
+ * @param unsigned O código a ser procurado.
+ * 
+ * @return order_t* Um ponteiro para o pedido encontrado ou NULL se não
+ * encontrou o pedido.
+ */
 order_t* find(const order_list_t* list, unsigned code) {
     order_t* it = NULL;
 	for (it = orders_begin(list); it != orders_end(list); it = it->next) {
@@ -157,34 +166,58 @@ order_t* orders_begin(const order_list_t* list) {
 }
 
 /**
- * Retorna o último elemento da lista.
+ * Retorna Um ponteiro para o elemento seguinte ao último elemento da lista,
+ * usualmente u mponteiro nulo.
  * 
  * @param const order_list_t* Um ponteiro para a lista de pedidos.
  * 
- * @return order_t* Um ponteiro para o último elemento. Caso a lista esteja
- * vazia, retorna NULL.
+ * @return order_t* O ponteiro para o elemento após o último.
  */
 order_t* orders_end(const order_list_t* list) {
 	return list->tail ? list->tail->next : NULL;
 }
 
+/**
+ * Retorna o código do pedido atual.
+ * 
+ * @return unsigned O Código atual.
+ */
 unsigned get_curr_code() {
 	return *(_internal_code());
 }
 
+/**
+ * Seta o último código utilizado no sub-sistema prevedor de códigos.
+ * 
+ * @param unsigned O código atual.
+ */
 void set_last_code(unsigned code) {
 	(*(_internal_code())) = code;
 }
 
+/**
+ * Retorna o próximo código de pedido.
+ * 
+ * @return unsigned O próximo código disponível.
+ */
 unsigned get_next_code() {
     return ++(*_internal_code());
 }
 
-int save(const order_list_t* list, char* filename) {
+/**
+ * Grava os dados do sistema em um arquivo.
+ * 
+ * @param const order_list_t* Um ponteiro para a lista.
+ * @param char* O nome do arquivo.
+ */
+void save(const order_list_t* list, char* filename) {
 	FILE* fp;
 	
 	if ((fp = fopen(filename, "wb")) != NULL) {
 		
+		/**
+		 * Gravando estoque.
+		 */
 		{
 			int value = 0;
 			
@@ -207,6 +240,9 @@ int save(const order_list_t* list, char* filename) {
 			stock_show();
 		}
 		
+		/**
+		 * Gravando dados da lista.
+		 */
 		{
 			unsigned value;
 			order_t* it;
@@ -229,14 +265,22 @@ int save(const order_list_t* list, char* filename) {
 	}
 }
 
-
-int load(order_list_t* list, char* filename) {
+/**
+ * Recupera os dados do sistema de um arquivo.
+ * 
+ * @param order_list_t* Um ponteiro para a lista.
+ * @param char* O nome do arquivo.
+ */
+void load(order_list_t* list, char* filename) {
 	FILE* fp;
 	
 	int value = 0;
 	
 	if ((fp = fopen(filename, "rb")) != NULL) {
 		
+		/**
+		 * Carregando estoque.
+		 */
 		{
 			int bean = 0;
 			int corn = 0;
@@ -255,6 +299,9 @@ int load(order_list_t* list, char* filename) {
 			stock_show();
 		}
 		
+		/**
+		 * Carregando dados da lista.
+		 */
 		{
 			unsigned last_code, item_code, count;
 			order_t order;
@@ -292,7 +339,10 @@ int load(order_list_t* list, char* filename) {
 /****************************************************************************/
 
 /**
- *
+ * Sub-sistema de códigos de pedidos.
+ * Mantém um proto-singleton para fornecer os códigos de pedidos.
+ * 
+ * @return unsigned* Um ponteiro para o sub-sistema interno de códigos.
  */
 unsigned* _internal_code() {
     static unsigned _code = 0;
@@ -405,6 +455,12 @@ int _can_attend(const order_t* order) {
 			stock_has_wine(order->data.wine));
 }
 
+/**
+ * Esvazia a lista de pedidos. Não tenta atender pedidos, somente esvazia a
+ * lista.
+ * 
+ * order_list_t* um ponteriro para lista.
+ */
 void _clear(order_list_t* list) {
 	order_t* it;
 	for (it = orders_begin(list); it != orders_end(list); it = it->next) {
