@@ -1,5 +1,5 @@
 /*
- * lista_simples.c
+ * lista_dupla.c
  *
  *  Created on: Oct 8, 2009
  *      Author: wesley
@@ -10,6 +10,7 @@
 struct st_no {
 	int num;
 	struct st_no* prox;
+	struct st_no* ant;
 };
 
 typedef struct st_no no;
@@ -20,7 +21,6 @@ typedef struct {
 } lista;
 
 
-
 void mostra_lista(const lista* l) {
 	no* i;
 	
@@ -29,7 +29,7 @@ void mostra_lista(const lista* l) {
 	}
 	else {
 		for(i = l->cabeca; i && (i != l->rabo->prox); i = i->prox) {
-			printf("%10p -> %10p : %d\n", i, i->prox, i->num);
+			printf("%10p <- %10p -> %10p : %d\n", i->ant, i, i->prox, i->num);
 		}
 	}
 }
@@ -42,7 +42,7 @@ void mostra_elementos(no* cabeca, no* rabo) {
 	}
 	else {
 		for(i = cabeca; i && (i != rabo->prox); i = i->prox) {
-			printf("%10p -> %10p : %d\n", i, i->prox, i->num);
+			printf("%10p <- %10p -> %10p : %d\n", i->ant, i, i->prox, i->num);
 		}
 	}
 }
@@ -59,14 +59,15 @@ void insere_cabeca_lista(lista* l, int val) {
 	no* temp = (no*)malloc(sizeof(no));
 	
 	temp->num = val;
+	temp->ant = temp->prox = NULL;
 	
 	if (l->cabeca == NULL) {
 		// Primeiro elemento.
 		l->cabeca = l->rabo = temp;
-		l->cabeca->prox = l->rabo->prox = NULL;
 	}
 	else {
 		temp->prox = l->cabeca;
+		l->cabeca->ant = temp;
 		l->cabeca = temp;
 	}
 }
@@ -75,14 +76,15 @@ void insere_cabeca_elementos(no** cabeca, no** rabo, int val) {
 	no* temp = (no*)malloc(sizeof(no));
 	
 	temp->num = val;
+	temp->ant = temp->prox = NULL;
 	
 	if ((*cabeca) == NULL) {
 		// Primeiro elemento.
 		(*cabeca) = (*rabo) = temp;
-		(*cabeca)->prox = (*rabo)->prox = NULL;
 	}
 	else {
 		temp->prox = (*cabeca);
+		(*cabeca)->ant = temp;
 		(*cabeca) = temp;
 	}
 }
@@ -91,15 +93,15 @@ void insere_rabo_lista(lista* l, int val) {
 	no* temp = (no*)malloc(sizeof(no));
 	
 	temp->num = val;
+	temp->ant = temp->prox = NULL;
 	
 	if (l->cabeca == NULL) {
 		// Primeiro elemento.
 		l->cabeca = l->rabo = temp;
-		l->cabeca->prox = l->rabo->prox = NULL;
 	}
 	else {
 		l->rabo->prox = temp;
-		temp->prox = NULL;
+		temp->ant = l->rabo;
 		l->rabo = temp;
 	}
 }
@@ -108,29 +110,30 @@ void insere_rabo_elementos(no** cabeca, no** rabo, int val) {
 	no* temp = (no*)malloc(sizeof(no));
 	
 	temp->num = val;
+	temp->ant = temp->prox = NULL;
 	
 	if ((*cabeca) == NULL) {
 		// Primeiro elemento.
 		(*cabeca) = (*rabo) = temp;
-		(*cabeca)->prox = (*rabo)->prox = NULL;
 	}
 	else {
 		(*rabo)->prox = temp;
-		temp->prox = NULL;
+		temp->ant = (*rabo);
 		(*rabo) = temp;
 	}
 }
 
 void remove_cabeca_lista(lista* l) {
-	no* temp = l->cabeca;
-	
-	if (temp != NULL) {
+	if (l->cabeca != NULL) {
+		no* temp = l->cabeca;
+		
 		if (l->cabeca == l->rabo) {
 			// Último elemento
 			l->cabeca = l->rabo = NULL;
 		}
 		else {
 			l->cabeca = l->cabeca->prox;
+			l->cabeca->ant = NULL;
 		}
 		
 		free(temp);
@@ -141,15 +144,16 @@ void remove_cabeca_lista(lista* l) {
 }
 
 void remove_cabeca_elementos(no** cabeca, no** rabo) {
-	no* temp = (*cabeca);
-	
-	if (temp != NULL) {
+	if ((*cabeca) != NULL) {
+		no* temp = (*cabeca);
+		
 		if ((*cabeca) == (*rabo)) {
 			// Último elemento
 			(*cabeca) = (*rabo) = NULL;
 		}
 		else {
 			(*cabeca) = (*cabeca)->prox;
+			(*cabeca)->ant = NULL;
 		}
 		
 		free(temp);
@@ -160,60 +164,42 @@ void remove_cabeca_elementos(no** cabeca, no** rabo) {
 }
 
 void remove_rabo_lista(lista* l) {
-	no* temp = l->cabeca;
-	
-	if (temp != NULL) {
-		no* penultimo = l->cabeca;
+	if (l->cabeca != NULL) {
+		no* temp = l->rabo;
 		
-		// procura o penúltimo elemento
-		while (penultimo && (penultimo->prox) && (penultimo->prox->prox)) {
-			penultimo = penultimo->prox;
-		}
-		
-		if (penultimo->prox == NULL) {
-			// penultimo é na verdade o último
+		if (l->cabeca == l->rabo) {
+			// Último elemento
 			l->cabeca = l->rabo = NULL;
-			temp = penultimo;
 		}
 		else {
-			temp = l->rabo;
-			l->rabo = penultimo;
-			penultimo->prox = NULL;
+			l->rabo = l->rabo->ant;
+			l->rabo->prox = NULL;
 		}
 		
 		free(temp);
 	}
 	else {
-		printf("Não posso remover do rabo. Lista vazia\n");
+		printf("Não posso tirar do seu rabo. Lista vazia\n");
 	}
 }
 
 void remove_rabo_elementos(no** cabeca, no** rabo) {
-	no* temp = (*cabeca);
-	
-	if (temp != NULL) {
-		no* penultimo = (*cabeca);
+	if ((*cabeca) != NULL) {
+		no* temp = (*rabo);
 		
-		// procura o penúltimo elemento
-		while (penultimo && (penultimo->prox) && (penultimo->prox->prox)) {
-			penultimo = penultimo->prox;
-		}
-		
-		if (penultimo->prox == NULL) {
-			// penultimo é na verdade o último
+		if ((*cabeca) == (*rabo)) {
+			// Último elemento
 			(*cabeca) = (*rabo) = NULL;
-			temp = penultimo;
 		}
 		else {
-			temp = (*rabo);
-			(*rabo) = penultimo;
-			penultimo->prox = NULL;
+			(*rabo) = (*rabo)->ant;
+			(*rabo)->prox = NULL;
 		}
 		
 		free(temp);
 	}
 	else {
-		printf("Não posso remover do rabo. Sem elementos\n");
+		printf("Não posso tirar do seu rabo. Sem elementos\n");
 	}
 }
 
@@ -251,12 +237,12 @@ int main(void) {
 	remove_cabeca_lista(&l);
 	remove_rabo_lista(&l);
 	remove_rabo_lista(&l);
+	mostra_lista(&l);
 	
 	no* cabeca;
 	no* rabo;
 	
 	inicia_elementos(&cabeca, &rabo);
-	mostra_elementos(cabeca, rabo);
 	
 	printf("\nInserindo Cabeça\n");
 	insere_cabeca_elementos(&cabeca, &rabo, 1);
@@ -266,7 +252,6 @@ int main(void) {
 	mostra_elementos(cabeca, rabo);
 	
 	printf("\nRemovendo Cabeça\n");
-	remove_cabeca_elementos(&cabeca, &rabo);
 	remove_cabeca_elementos(&cabeca, &rabo);
 	remove_cabeca_elementos(&cabeca, &rabo);
 	mostra_elementos(cabeca, rabo);
@@ -280,6 +265,7 @@ int main(void) {
 	remove_rabo_elementos(&cabeca, &rabo);
 	remove_rabo_elementos(&cabeca, &rabo);
 	remove_rabo_elementos(&cabeca, &rabo);
+	remove_rabo_elementos(&cabeca, &rabo);
 	mostra_elementos(cabeca, rabo);
 	
 	printf("\nRemovendo depois de vazia\n");
@@ -287,6 +273,7 @@ int main(void) {
 	remove_cabeca_elementos(&cabeca, &rabo);
 	remove_rabo_elementos(&cabeca, &rabo);
 	remove_rabo_elementos(&cabeca, &rabo);
+	mostra_elementos(cabeca, rabo);
 	
 	return EXIT_SUCCESS;
 }
