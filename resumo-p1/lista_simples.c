@@ -120,75 +120,97 @@ void insere_rabo_elementos(no** cabeca, no** rabo, int val) {
 void remove_cabeca_lista(lista* l) {
 	no* temp = l->cabeca;
 	
-	if (l->cabeca == l->rabo) {
-		// Último elemento
-		l->cabeca = l->rabo = NULL;
+	if (temp != NULL) {
+		if (l->cabeca == l->rabo) {
+			// Último elemento
+			l->cabeca = l->rabo = NULL;
+		}
+		else {
+			l->cabeca = l->cabeca->prox;
+		}
+		
+		free(temp);
 	}
 	else {
-		l->cabeca = l->cabeca->prox;
+		printf("Não posso remover da cabeça. Lista vazia\n");
 	}
-	
-	free(temp);
 }
 
 void remove_cabeca_elementos(no** cabeca, no** rabo) {
 	no* temp = (*cabeca);
 	
-	if ((*cabeca) == (*rabo)) {
-		// Último elemento
-		(*cabeca) = (*rabo) = NULL;
+	if (temp != NULL) {
+		if ((*cabeca) == (*rabo)) {
+			// Último elemento
+			(*cabeca) = (*rabo) = NULL;
+		}
+		else {
+			(*cabeca) = (*cabeca)->prox;
+		}
+		
+		free(temp);
 	}
 	else {
-		(*cabeca) = (*cabeca)->prox;
+		printf("Não posso remover da cabeça. Lista vazia\n");
 	}
-	
-	free(temp);
 }
 
 void remove_rabo_lista(lista* l) {
-	no* temp;
-	no* penultimo = l->cabeca;
+	no* temp = l->cabeca;
 	
-	// procura o penúltimo elemento
-	while (penultimo && (penultimo->prox) && (penultimo->prox->prox)) {
-		penultimo = penultimo->prox;
-	}
-	
-	if (penultimo->prox == NULL) {
-		// penultimo é na verdade o último
-		l->cabeca = l->rabo = NULL;
-		temp = penultimo;
+	if (temp != NULL) {
+		no* penultimo = l->cabeca;
+		
+		// procura o penúltimo elemento
+		while (penultimo && (penultimo->prox) && (penultimo->prox->prox)) {
+			penultimo = penultimo->prox;
+		}
+		
+		if (penultimo->prox == NULL) {
+			// penultimo é na verdade o último
+			l->cabeca = l->rabo = NULL;
+			temp = penultimo;
+		}
+		else {
+			temp = l->rabo;
+			l->rabo = penultimo;
+			penultimo->prox = NULL;
+		}
+		
+		free(temp);
 	}
 	else {
-		temp = l->rabo;
-		l->rabo = penultimo;
-		penultimo->prox = NULL;
+		printf("Não posso remover do rabo. Lista vazia\n");
 	}
-	
-	free(temp);
 }
 
 void remove_rabo_elementos(no** cabeca, no** rabo) {
-	no* temp;
-	no* penultimo = (*cabeca);
+	no* temp = (*cabeca);
 	
-	// procura o penúltimo elemento
-	while (penultimo && (penultimo->prox) && (penultimo->prox->prox)) {
-		penultimo = penultimo->prox;
-	}
-	
-	if (penultimo->prox == NULL) {
-		// penultimo é na verdade o último
-		(*cabeca) = (*rabo) = NULL;
-		temp = penultimo;
+	if (temp != NULL) {
+		no* penultimo = (*cabeca);
+		
+		// procura o penúltimo elemento
+		while (penultimo && (penultimo->prox) && (penultimo->prox->prox)) {
+			penultimo = penultimo->prox;
+		}
+		
+		if (penultimo->prox == NULL) {
+			// penultimo é na verdade o último
+			(*cabeca) = (*rabo) = NULL;
+			temp = penultimo;
+		}
+		else {
+			temp = (*rabo);
+			(*rabo) = penultimo;
+			penultimo->prox = NULL;
+		}
+		
+		free(temp);
 	}
 	else {
-		temp = (*rabo);
-		(*rabo) = penultimo;
-		penultimo->prox = NULL;
+		printf("Não posso remover do rabo. Lista vazia\n");
 	}
-	
-	free(temp);
 }
 
 int main(void) {
@@ -196,29 +218,35 @@ int main(void) {
 	
 	inicia_lista(&l);
 	
-	printf("Inserindo Cabeça\n");
+	printf("\nInserindo Cabeça\n");
 	insere_cabeca_lista(&l, 1);
 	insere_cabeca_lista(&l, 2);
 	insere_cabeca_lista(&l, 3);
 	insere_cabeca_lista(&l, 4);
 	mostra_lista(&l);
 	
-	printf("Removendo Cabeça\n");
+	printf("\nRemovendo Cabeça\n");
 	remove_cabeca_lista(&l);
 	remove_cabeca_lista(&l);
 	mostra_lista(&l);
 	
-	printf("Inserindo Rabo\n");
+	printf("\nInserindo Rabo\n");
 	insere_rabo_lista(&l, 5);
 	insere_rabo_lista(&l, 6);
 	mostra_lista(&l);
 	
-	printf("Removendo Rabo\n");
+	printf("\nRemovendo Rabo\n");
 	remove_rabo_lista(&l);
 	remove_rabo_lista(&l);
 	remove_rabo_lista(&l);
 	remove_rabo_lista(&l);
 	mostra_lista(&l);
+	
+	printf("\nRemovendo depois de vazia\n");
+	remove_cabeca_lista(&l);
+	remove_cabeca_lista(&l);
+	remove_rabo_lista(&l);
+	remove_rabo_lista(&l);
 	
 	no* cabeca;
 	no* rabo;
@@ -226,28 +254,35 @@ int main(void) {
 	inicia_elementos(&cabeca, &rabo);
 	mostra_elementos(cabeca, rabo);
 	
-	printf("Inserindo Cabeça\n");
+	printf("\nInserindo Cabeça\n");
 	insere_cabeca_elementos(&cabeca, &rabo, 1);
 	insere_cabeca_elementos(&cabeca, &rabo, 2);
 	insere_cabeca_elementos(&cabeca, &rabo, 3);
 	insere_cabeca_elementos(&cabeca, &rabo, 4);
 	mostra_elementos(cabeca, rabo);
 	
-	printf("Removendo Cabeça\n");
+	printf("\nRemovendo Cabeça\n");
+	remove_cabeca_elementos(&cabeca, &rabo);
 	remove_cabeca_elementos(&cabeca, &rabo);
 	remove_cabeca_elementos(&cabeca, &rabo);
 	mostra_elementos(cabeca, rabo);
 	
-	printf("Inserindo Rabo\n");
+	printf("\nInserindo Rabo\n");
 	insere_rabo_elementos(&cabeca, &rabo, 5);
 	insere_rabo_elementos(&cabeca, &rabo, 6);
 	mostra_elementos(cabeca, rabo);
 	
-	printf("Inserindo Rabo\n");
+	printf("\nRemovendo Rabo\n");
 	remove_rabo_elementos(&cabeca, &rabo);
 	remove_rabo_elementos(&cabeca, &rabo);
 	remove_rabo_elementos(&cabeca, &rabo);
 	mostra_elementos(cabeca, rabo);
+	
+	printf("\nRemovendo depois de vazia\n");
+	remove_cabeca_elementos(&cabeca, &rabo);
+	remove_cabeca_elementos(&cabeca, &rabo);
+	remove_rabo_elementos(&cabeca, &rabo);
+	remove_rabo_elementos(&cabeca, &rabo);
 	
 	return EXIT_SUCCESS;
 }
