@@ -143,6 +143,5 @@ int main(void) {
 		printf("\nElemento %d não encontrado\n", elemento);
 	}
 	
-	
 	return EXIT_SUCCESS;
 }
