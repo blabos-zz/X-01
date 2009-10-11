@@ -34,7 +34,7 @@ Game::~Game() {
 void Game::monsterAttack() {
 	int i = random();
 	
-	_dungeon[3]->attack();
+	_dungeon[i]->attack();
 }
 
 int Game::random() {

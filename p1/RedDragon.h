@@ -15,7 +15,7 @@ public:
 	RedDragon();
 	virtual ~RedDragon();
 	
-	//virtual void attack();
+	virtual void attack();
 };
 
 #endif /* REDDRAGON_H_ */

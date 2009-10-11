@@ -19,6 +19,6 @@ RedDragon::~RedDragon() {
 	// TODO Auto-generated destructor stub
 }
 
-/*void RedDragon::attack() {
+void RedDragon::attack() {
 	cout << "RedDragon::attack(): Super-Hiper-Red-Fire!!!!" << endl;
-}*/
+}
