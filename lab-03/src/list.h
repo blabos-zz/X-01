@@ -11,11 +11,15 @@
 
 #define MAX_STR 20
 
-typedef char string_t[MAX_STR];
+typedef char string_t[MAX_STR+1];
 
-struct node_st {
+typedef struct {
 	int				code;
 	string_t		name;
+} product_t;
+
+struct node_st {
+	product_t		prod;
 	struct node_st*	next;
 	struct node_st*	prev;
 };
@@ -32,11 +36,11 @@ typedef struct {
 list_t* new_list();
 void	del_list(list_t*);
 
-int		push_front(list_t*, node_t*);
-int		push_back(list_t*, node_t*);
+int		push_front(list_t*, product_t*);
+int		push_back(list_t*, product_t*);
 
-int		pop_front(list_t*, node_t*);
-int		pop_back(list_t*, node_t*);
+int		pop_front(list_t*, product_t*);
+int		pop_back(list_t*, product_t*);
 
 void	print_list(const list_t*);
 void	print_node(const node_t*);

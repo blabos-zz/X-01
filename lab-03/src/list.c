@@ -14,7 +14,7 @@
 node_t*		_new_node();
 void		_del_node(node_t*);
 
-void		_set_node(node_t*, const node_t*);
+void		_set_prod(product_t*, const product_t*);
 
 
 list_t* new_list() {
@@ -27,11 +27,11 @@ void del_list(list_t* list) {
 	free(list);
 }
 
-int push_front(list_t* list, node_t* n) {
+int push_front(list_t* list, product_t* p) {
     int retval = 0;
     
 	node_t* node = _new_node();
-	_set_node(node, n);
+	_set_prod(&(node->prod), p);
 	
 	if (node) {
 		if (list->tail == NULL) {
@@ -50,17 +50,17 @@ int push_front(list_t* list, node_t* n) {
 			list->head = node;
 		}
 		list->size++;
-		retval = node->code;
+		retval = node->prod.code;
 	}
 	
 	return retval;
 }
 
-int push_back(list_t* list, node_t* n) {
+int push_back(list_t* list, product_t* p) {
     int retval = 0;
     
-	node_t* node = _new_node(n);
-	_set_node(node, n);
+	node_t* node = _new_node();
+	_set_prod(&(node->prod), p);
 	
 	if (node) {
 		if (list->head == NULL) {
@@ -79,19 +79,18 @@ int push_back(list_t* list, node_t* n) {
 			list->tail = node;
 		}
 		list->size++;
-		retval = node->code;
+		retval = node->prod.code;
 	}
 	
 	return retval;
 }
 
-int pop_back(list_t* list, node_t* node) {
+int pop_back(list_t* list, product_t* p) {
 	node_t*		tmp		= list->tail;
 	int			retval	= 0;
 	
 	if (list->size) {
-		_set_node(node, tmp);
-		node->next = node->prev = NULL;
+		_set_prod(p, &(tmp->prod));
 		
 		list->size--;
 		retval = 1;
@@ -110,13 +109,12 @@ int pop_back(list_t* list, node_t* node) {
 	
 	return retval;
 }
-int pop_front(list_t* list, node_t* node) {
+int pop_front(list_t* list, product_t* p) {
 	node_t*		tmp		= list->head;
 	int			retval	= 0;
 	
 	if (list->size) {
-		_set_node(node, tmp);
-		node->next = node->prev = NULL;
+		_set_prod(p, &(tmp->prod));
 		
 		list->size--;
 		retval = 1;
@@ -155,8 +153,8 @@ void print_list(const list_t* list) {
 void print_node(const node_t* node) {
 	printf("%10p <- %10p -> %10p: {%10d, %20s}\n",
 				node->prev, node, node->next,
-				node->code,
-				node->name);
+				node->prod.code,
+				node->prod.name);
 }
 
 node_t*	begin(const list_t* list) {
@@ -182,7 +180,7 @@ void _del_node(node_t* node) {
 	free(node);
 }
 
-void _set_node(node_t* dest, const node_t* src) {
-	dest->code = src->code;
-	strncpy(dest->name, src->name, MAX_STR);
+void _set_prod(product_t* dest, const product_t* orig) {
+	dest->code = orig->code;
+	strncpy(dest->name, orig->name, MAX_STR);
 }
