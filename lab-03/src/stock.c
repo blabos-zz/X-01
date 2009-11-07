@@ -60,29 +60,95 @@ void reload_wake() {
 	product_t prod;
 	int nprod = _random(MIN_WAKE, MAX_WAKE);
 	
+	printf("Reabastecendo a esteira:\n\n");
+
 	for (i = 0; i < nprod; i++) {
 		prod = _new_product(_random(TV, PA));
 		push_back(_get_wake(), &prod);
+		printf("Colocando produto %d na esteira\n", prod.code);
 	}
 }
 
 void reload_stock() {
 	product_t prod;
-	int type;
+	int type, size;
 	
-	while (_get_wake()->size) {
-		pop_front(_get_wake(), &prod);
-		
-		type = prod.code / TYPE_OFFSET;
-		
-		switch(type) {
-		case TV:	push_front(_get_stock()->tv, &prod); break;
-		case MO:	push_front(_get_stock()->mo, &prod); break;
-		case PA:	push_front(_get_stock()->pa, &prod); break;
-		default:	printf("Produto desconhecido na esteira: {%10d, %20s}",
-				prod.code, prod.name);
+	printf("Reabastecendo estoque:\n\n");
+
+	size = _get_wake()->size;
+	
+	if (size) {
+		while (size--) {
+			pop_front(_get_wake(), &prod);
+	
+			type = prod.code / TYPE_OFFSET;
+			
+			switch(type) {
+				case TV: {
+					push_front(_get_stock()->tv, &prod);
+					printf("Empilhando produto %d na pilha de TVs\n",
+							prod.code);
+					break;
+				}
+	
+				case MO: {
+					push_front(_get_stock()->mo, &prod);
+					printf("Empilhando produto %d na pilha de Microondas\n",
+							prod.code);
+					break;
+				}
+	
+				case PA: {
+					if (_get_stock()->pa->size < MAX_PAN) {
+						push_front(_get_stock()->pa, &prod);
+						printf("Empilhando produto %d na pilha de Panificadoras\n",
+								prod.code);
+					}
+					else {
+						printf("Pilha de Panificadoras cheia. ");
+						printf("Colocando Panificadora %d no final da esteira\n",
+								prod.code);
+						push_back(_get_wake(), &prod);
+					}
+	
+					break;
+				}
+	
+				default: printf("Produto desconhecido na esteira: {%10d, %20s}",
+					prod.code, prod.name);
+			}
 		}
 	}
+	else {
+		printf("Esteira vazia\n");
+	}
+}
+
+node_t* wk_begin()	{ return _get_wake()->head;		}
+node_t* wk_end()	{ return NULL;					}
+node_t* tv_begin()	{ return _get_stock()->tv->head;}
+node_t* tv_end()	{ return NULL;					}
+node_t* mo_begin()	{ return _get_stock()->mo->head;}
+node_t* mo_end()	{ return NULL;					}
+node_t* pa_begin()	{ return _get_stock()->pa->head;}
+node_t* pa_end()	{ return NULL;					}
+
+int wk_size()		{ return _get_wake()->size;		}
+int tv_size()		{ return _get_stock()->tv->size;}
+int mo_size()		{ return _get_stock()->mo->size;}
+int pa_size()		{ return _get_stock()->pa->size;}
+
+int attend_order(int type, product_t* prod) {
+	int retval = 0;
+
+	switch(type) {
+		case TV: retval = pop_front(_get_stock()->tv, prod); break;
+		case MO: retval = pop_front(_get_stock()->mo, prod); break;
+		case PA: retval = pop_front(_get_stock()->pa, prod); break;
+		default: retval = 0;
+	}
+
+	return retval;
 }
 
 
@@ -92,8 +158,8 @@ stock_t* _get_stock() {
 }
 
 queue_t* _get_wake() {
-	static queue_t* _wake = new_list();
-	return _wake;
+	static queue_t _wake = {0,0,0};
+	return &_wake;
 }
 
 int _random(int a, int b) {
