@@ -40,6 +40,9 @@ int main(int argc, char** argv) {
     printf("\nIN-OREDER\n");
     print_in(root, 0);
     
+    printf("MIN: %d\n", min_node(root)->key);
+    printf("MAX: %d\n", max_node(root)->key);
+    
     
     return EXIT_SUCCESS;
 }

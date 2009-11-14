@@ -11,9 +11,6 @@
 void        _print_node(node_t*, int);
 node_t*     _ins_node(node_t**, node_t*, int);
 
-node_t*     _left_most(node_t*);
-node_t*     _right_most(node_t*);
-
 
 node_t* new_tree() {
     return NULL;
@@ -47,8 +44,9 @@ node_t* _ins_node(node_t** node, node_t* parent, int key) {
 void del_node(node_t** root, node_t* node) {
     if (node) {
         if (node->left && node->right) {
-            node_t* sucessor
-                = next_node(node);
+            // Dois filhos
+            
+            node_t* sucessor = next_node(node);
             
             if (node->parent) {
                 if (node->parent->left == node) {
@@ -76,11 +74,15 @@ void del_node(node_t** root, node_t* node) {
             sucessor->parent    = node->parent;
             node->left->parent  = sucessor;
         }
-        else if (!(node->left || node->right)) {
+        else if (!(node->left
+                || node->right)) {
+            // Nenhum filho
             if(node->parent->left == node) node->parent->left = NULL;
             else node->parent->right = NULL;
         }
         else {
+            // Somente um filho
+            
             node_t* child = node->left ? node->left : node->right;
             
             if(node->parent->left == node) node->parent->left = child;
@@ -93,7 +95,7 @@ void del_node(node_t** root, node_t* node) {
 
 node_t* next_node(node_t* node) {
     if (node) {
-        if (node->right) return _left_most(node->right);
+        if (node->right) return min_node(node->right);
         else {
             node_t* temp = node->parent;
             while (temp && (temp->right == node)) {
@@ -108,7 +110,7 @@ node_t* next_node(node_t* node) {
 
 node_t* prev_node(node_t* node) {
     if (node) {
-        if (node->left) return _right_most(node->left);
+        if (node->left) return max_node(node->left);
         else {
             node_t* temp = node->parent;
             while (temp && (temp->left == node)) {
@@ -118,6 +120,16 @@ node_t* prev_node(node_t* node) {
             return temp;
         }
     }
+    else return node;
+}
+
+node_t* max_node(node_t* node) {
+    if (node->right) return max_node(node->right);
+    else return node;
+}
+
+node_t* min_node(node_t* node) {
+    if (node->left) return min_node(node->left);
     else return node;
 }
 
@@ -159,14 +171,4 @@ void _print_node(node_t* node, int level) {
             node->parent, node, node->left, node->right);
     for (i = 0; i <= level; i++) printf(".");
     printf("%d\n", node->key);
-}
-
-node_t* _right_most(node_t* node) {
-    if (node->right) return _right_most(node->right);
-    else return node;
-}
-
-node_t* _left_most(node_t* node) {
-    if (node->left) return _left_most(node->left);
-    else return node;
 }
