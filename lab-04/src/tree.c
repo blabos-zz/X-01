@@ -74,8 +74,7 @@ void del_node(node_t** root, node_t* node) {
             sucessor->parent    = node->parent;
             node->left->parent  = sucessor;
         }
-        else if (!(node->left
-                || node->right)) {
+        else if (!(node->left || node->right)) {
             // Nenhum filho
             if(node->parent->left == node) node->parent->left = NULL;
             else node->parent->right = NULL;
