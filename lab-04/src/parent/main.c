@@ -12,7 +12,6 @@ int main(int argc, char** argv) {
     node_t* root = new_tree();
     node_t* node;
     node_t* n;
-    
     int key = argc == 2 ? atoi(argv[1]) : 0;
     
     ins_node(&root, 5);
@@ -28,12 +27,22 @@ int main(int argc, char** argv) {
     ins_node(&root, 10);
     
     printf("\nIN-OREDER\n");
-    print_in(root);
+    print_in(root, 0);
     
-    del_node(&root, 5);
+    node = find_node(root, key);
+    
+    if (node) {
+        printf("Deletando Key %d\n", key);
+        del_node(&root, node);
+    }
+    else printf("Key %d nao encontrada\n", key);
     
     printf("\nIN-OREDER\n");
-    print_in(root);
+    print_in(root, 0);
+    
+    printf("MIN: %d\n", min_node(root)->key);
+    printf("MAX: %d\n", max_node(root)->key);
+    
     
     return EXIT_SUCCESS;
 }

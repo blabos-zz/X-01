@@ -1,15 +1,23 @@
 /*
  * tree.c
  *
- *  Created on: 10/11/2009
- *      Author: blabos
+ *  Created on: 19/11/2009
+ *      Author: wesley
  */
 #include "tree.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 
+
+
+void        _del_node(node_t**, node_t*);
+node_t*     _next_node(node_t*, int, int*);
+
 void        _print_node(node_t*, int);
-node_t*     _ins_node(node_t**, node_t*, int);
+void        _print_in(node_t*, int);
+void        _print_pre(node_t*, int);
+void        _print_pos(node_t*, int);
 
 
 node_t* new_tree() {
@@ -21,100 +29,39 @@ void del_tree(node_t** root) {
 }
 
 node_t* ins_node(node_t** node, int key) {
-    return _ins_node(node, NULL, key);
-}
-
-node_t* _ins_node(node_t** node, node_t* parent, int key) {
-    if (*node == NULL) {
+    if (!(*node)) {
         (*node) = (node_t*)malloc(sizeof(node_t));
         if (*node) {
-            (*node)->key    = key;
-            (*node)->parent = parent;
+            (*node)->key = key;
         }
         return (*node);
     }
     else if (key <= (*node)->key) {
-        return _ins_node(&((*node)->left), (*node), key);
+        return ins_node(&((*node)->left), key);
     }
     else {
-        return _ins_node(&((*node)->right), (*node), key);
+        return ins_node(&((*node)->right), key);
     }
 }
 
-void del_node(node_t** root, node_t* node) {
+void del_node(node_t** root, int key) {
+    node_t* node = find_node(*root, key);
+    
     if (node) {
-        if (node->left && node->right) {
-            // Dois filhos
-            
-            node_t* sucessor = next_node(node);
-            
-            if (node->parent) {
-                if (node->parent->left == node) {
-                    // Nó a deletar à esquerda do seu pai
-                    node->parent->left = sucessor;
-                    node->right->parent = sucessor;
-                }
-                else {
-                    // Nó a deletar à direita do seu pai
-                    node->parent->right = sucessor;
-                }
-            }
-            else {
-                (*root) = sucessor;
-            }
-            
-            if (sucessor->parent->left == sucessor) {
-                // Sucessor à esquerda do seu pai.
-                sucessor->parent->left  = sucessor->right;
-                sucessor->right         = node->right;
-                sucessor->right->parent = sucessor;
-            }
-            
-            sucessor->left      = node->left;
-            sucessor->parent    = node->parent;
-            node->left->parent  = sucessor;
-        }
-        else if (!(node->left || node->right)) {
-            // Nenhum filho
-            if(node->parent->left == node) node->parent->left = NULL;
-            else node->parent->right = NULL;
-        }
-        else {
-            // Somente um filho
-            
-            node_t* child = node->left ? node->left : node->right;
-            
-            if(node->parent->left == node) node->parent->left = child;
-            else node->parent->right = child;
-        }
-        
+        _del_node(root, node);
         free(node);
     }
 }
 
-node_t* next_node(node_t* node) {
+node_t* next_node(node_t** root, int key) {
+    node_t* node = find_node(*root, key);
     if (node) {
         if (node->right) return min_node(node->right);
         else {
-            node_t* temp = node->parent;
+            node_t* temp = find_parent(*root, node->key);
             while (temp && (temp->right == node)) {
-                node = node->parent;
-                temp = temp->parent;
-            }
-            return temp;
-        }
-    }
-    else return node;
-}
-
-node_t* prev_node(node_t* node) {
-    if (node) {
-        if (node->left) return max_node(node->left);
-        else {
-            node_t* temp = node->parent;
-            while (temp && (temp->left == node)) {
-                node = node->parent;
-                temp = temp->parent;
+                node = find_parent(*root, node->key);
+                temp = find_parent(*root, temp->key);
             }
             return temp;
         }
@@ -138,26 +85,54 @@ node_t* find_node(node_t* node, int key) {
     else return find_node(node->right, key);
 }
 
-void print_in(node_t* node, int level) {
+node_t* find_parent(node_t* node, int key) {
     if (node) {
-        print_in(node->left, level + 1);
-        _print_node(node, level);
-        print_in(node->right, level + 1);
+        if (key < node->key) {
+            if (node->left && (key == node->left->key)) return node;
+            else return find_parent(node->left, key);
+        }
+        else {
+            if (node->right && (key == node->right->key)) return node;
+            else return find_parent(node->right, key);
+        }
+    }
+    else {
+        return NULL;
     }
 }
 
-void print_pre(node_t* node, int level) {
+void print_in(node_t* node) {
+    _print_in(node, 0);
+}
+
+void print_pre(node_t* node) {
+    _print_pre(node, 0);
+}
+
+void print_pos(node_t* node) {
+    _print_pos(node, 0);
+}
+
+void _print_in(node_t* node, int level) {
     if (node) {
+        _print_in(node->left, level + 1);
         _print_node(node, level);
-        print_in(node->left, level + 1);
-        print_in(node->right, level + 1);
+        _print_in(node->right, level + 1);
     }
 }
 
-void print_pos(node_t* node, int level) {
+void _print_pre(node_t* node, int level) {
     if (node) {
-        print_in(node->left, level + 1);
-        print_in(node->right, level + 1);
+        _print_node(node, level);
+        _print_pre(node->left, level + 1);
+        _print_pre(node->right, level + 1);
+    }
+}
+
+void _print_pos(node_t* node, int level) {
+    if (node) {
+        _print_pos(node->left, level + 1);
+        _print_pos(node->right, level + 1);
         _print_node(node, level);
     }
 }
@@ -166,8 +141,63 @@ void print_pos(node_t* node, int level) {
 void _print_node(node_t* node, int level) {
     int i;
     
-    printf("{P:%10p N:%10p L:%10p R:%10p}: ",
-            node->parent, node, node->left, node->right);
+    printf("{N:%10p L:%10p R:%10p}: ", node, node->left, node->right);
     for (i = 0; i <= level; i++) printf(".");
     printf("%d\n", node->key);
+}
+
+node_t* _next_node(node_t* node, int key, int* match) {
+    if (node) {
+        if (*match) return node;
+        _next_node(node->left, key, match);
+        if (key == node->key) (*match) = 1;
+        _next_node(node->right, key, match);
+    }
+    else (*match) = 0;
+    
+    return NULL;
+}
+
+
+void _del_node(node_t** root, node_t* node) {
+    node_t* parent = find_parent(*root, node->key);
+    
+    if (node->left && node->right) {
+        // Dois filhos
+        printf("Dois filhos\n");
+        
+        node_t* suc = next_node(root, node->key);
+        _del_node(root, suc);
+        
+        if (parent) {
+            if (parent->left == node)
+                parent->left = suc;
+            else
+                parent->right = suc;
+        }
+        else {
+            (*root) = suc;
+        }
+        
+        suc->left   = node->left;
+        suc->right  = node->right;
+    }
+    else if (!node->left && !node->right) {
+        // Sem filhos
+        printf("Sem filhos\n");
+        
+        if (parent) {
+            if (parent->left == node) parent->left = NULL;
+            else parent->right = NULL;
+        }
+    }
+    else {
+        // Um filho
+        printf("Um filho\n");
+        
+        node_t* child = node->left ? node->left : node->right;
+        
+        if (parent->left == node) parent->left = child;
+        else parent->right = child;
+    }
 }
