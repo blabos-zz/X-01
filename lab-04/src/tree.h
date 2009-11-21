@@ -24,9 +24,6 @@ void        del_tree(node_t**);
 node_t*     ins_node(node_t**, int);
 void        del_node(node_t**, int);
 
-node_t*     next_node(node_t**, int);
-node_t*     prev_node(node_t**, int);
-
 node_t*     max_node(node_t*);
 node_t*     min_node(node_t*);
 

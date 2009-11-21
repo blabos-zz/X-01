@@ -30,7 +30,8 @@ int main(int argc, char** argv) {
     printf("\nIN-OREDER\n");
     print_in(root);
     
-    del_node(&root, 5);
+    del_node(&root, 7);
+    del_node(&root, 8);
     
     printf("\nIN-OREDER\n");
     print_in(root);

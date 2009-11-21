@@ -10,9 +10,7 @@
 #include <stdio.h>
 
 
-
 void        _del_node(node_t**, node_t*);
-node_t*     _next_node(node_t*, int, int*);
 
 void        _print_node(node_t*, int);
 void        _print_in(node_t*, int);
@@ -51,22 +49,6 @@ void del_node(node_t** root, int key) {
         _del_node(root, node);
         free(node);
     }
-}
-
-node_t* next_node(node_t** root, int key) {
-    node_t* node = find_node(*root, key);
-    if (node) {
-        if (node->right) return min_node(node->right);
-        else {
-            node_t* temp = find_parent(*root, node->key);
-            while (temp && (temp->right == node)) {
-                node = find_parent(*root, node->key);
-                temp = find_parent(*root, temp->key);
-            }
-            return temp;
-        }
-    }
-    else return node;
 }
 
 node_t* max_node(node_t* node) {
@@ -146,18 +128,6 @@ void _print_node(node_t* node, int level) {
     printf("%d\n", node->key);
 }
 
-node_t* _next_node(node_t* node, int key, int* match) {
-    if (node) {
-        if (*match) return node;
-        _next_node(node->left, key, match);
-        if (key == node->key) (*match) = 1;
-        _next_node(node->right, key, match);
-    }
-    else (*match) = 0;
-    
-    return NULL;
-}
-
 
 void _del_node(node_t** root, node_t* node) {
     node_t* parent = find_parent(*root, node->key);
@@ -166,21 +136,21 @@ void _del_node(node_t** root, node_t* node) {
         // Dois filhos
         printf("Dois filhos\n");
         
-        node_t* suc = next_node(root, node->key);
-        _del_node(root, suc);
+        node_t* replacer = min_node(node->right);
+        _del_node(root, replacer);
         
         if (parent) {
             if (parent->left == node)
-                parent->left = suc;
+                parent->left = replacer;
             else
-                parent->right = suc;
+                parent->right = replacer;
         }
         else {
-            (*root) = suc;
+            (*root) = replacer;
         }
         
-        suc->left   = node->left;
-        suc->right  = node->right;
+        replacer->left  = node->left;
+        replacer->right = node->right;
     }
     else if (!node->left && !node->right) {
         // Sem filhos
