@@ -27,12 +27,15 @@ void        del_node(node_t**, int);
 node_t*     max_node(node_t*);
 node_t*     min_node(node_t*);
 
-node_t*     find_node(node_t*, int key);
-node_t*     find_parent(node_t*, int key);
+node_t*     find_node(node_t*, int);
+void        find_parent(node_t*, int, node_t**, node_t**);
 
 void        print_in(node_t*);
 void        print_pre(node_t*);
 void        print_pos(node_t*);
+
+int         count_nodes(node_t*);
+int         count_leaves(node_t*);
 
 
 #endif /* TREE_H_ */

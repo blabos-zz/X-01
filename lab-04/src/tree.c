@@ -10,7 +10,7 @@
 #include <stdio.h>
 
 
-void        _del_node(node_t**, node_t*);
+node_t*     _del_node(node_t**, int key);
 
 void        _print_node(node_t*, int);
 void        _print_in(node_t*, int);
@@ -43,10 +43,8 @@ node_t* ins_node(node_t** node, int key) {
 }
 
 void del_node(node_t** root, int key) {
-    node_t* node = find_node(*root, key);
-    
+    node_t* node = _del_node(root, key);
     if (node) {
-        _del_node(root, node);
         free(node);
     }
 }
@@ -67,21 +65,52 @@ node_t* find_node(node_t* node, int key) {
     else return find_node(node->right, key);
 }
 
-node_t* find_parent(node_t* node, int key) {
-    if (node) {
-        if (key < node->key) {
-            if (node->left && (key == node->left->key)) return node;
-            else return find_parent(node->left, key);
+void find_parent(node_t* root, int key, node_t** node, node_t** parent) {
+    (*node) = (*parent) = NULL;
+    
+    if (root) {
+        if (key < root->key) {
+            if (root->left && (key == root->left->key)) {
+                (*node)     = root->left;
+                (*parent)   = root;
+            }
+            else {
+                find_parent(root->left, key, node, parent);
+            }
         }
         else {
-            if (node->right && (key == node->right->key)) return node;
-            else return find_parent(node->right, key);
+            if (root->right && (key == root->right->key)) {
+                (*node)     = root->right;
+                (*parent)   = root;
+            }
+            else {
+                find_parent(root->right, key, node, parent);
+            }
         }
     }
+}
+
+int count_nodes(node_t* node) {
+    if (!node) {
+        return 0;
+    }
     else {
-        return NULL;
+        return count_nodes(node->left) + 1 + count_nodes(node->right);
     }
 }
+
+int count_leaves(node_t* node) {
+    if (!node) {
+        return 0;
+    }
+    else if (!(node->left || node->right)) {
+        return 1;
+    }
+    else {
+        return count_leaves(node->left) + count_leaves(node->right);
+    }
+}
+
 
 void print_in(node_t* node) {
     _print_in(node, 0);
@@ -129,45 +158,52 @@ void _print_node(node_t* node, int level) {
 }
 
 
-void _del_node(node_t** root, node_t* node) {
-    node_t* parent = find_parent(*root, node->key);
+node_t* _del_node(node_t** root, int key) {
+    node_t* node    = NULL;
+    node_t* parent  = NULL;
     
-    if (node->left && node->right) {
-        // Dois filhos
-        printf("Dois filhos\n");
-        
-        node_t* replacer = min_node(node->right);
-        _del_node(root, replacer);
-        
-        if (parent) {
-            if (parent->left == node)
-                parent->left = replacer;
-            else
-                parent->right = replacer;
+    find_parent(*root, key, &node, &parent);
+    
+    if (node) {
+        if (node->left && node->right) {
+            // Dois filhos
+            printf("Dois filhos\n");
+            
+            node_t* replacer = min_node(node->right);
+            _del_node(root, replacer->key);
+            
+            if (parent) {
+                if (parent->left == node)
+                    parent->left = replacer;
+                else
+                    parent->right = replacer;
+            }
+            else {
+                (*root) = replacer;
+            }
+            
+            replacer->left  = node->left;
+            replacer->right = node->right;
+        }
+        else if (!node->left && !node->right) {
+            // Sem filhos
+            printf("Sem filhos\n");
+            
+            if (parent) {
+                if (parent->left == node) parent->left = NULL;
+                else parent->right = NULL;
+            }
         }
         else {
-            (*root) = replacer;
-        }
-        
-        replacer->left  = node->left;
-        replacer->right = node->right;
-    }
-    else if (!node->left && !node->right) {
-        // Sem filhos
-        printf("Sem filhos\n");
-        
-        if (parent) {
-            if (parent->left == node) parent->left = NULL;
-            else parent->right = NULL;
+            // Um filho
+            printf("Um filho\n");
+            
+            node_t* child = node->left ? node->left : node->right;
+            
+            if (parent->left == node) parent->left = child;
+            else parent->right = child;
         }
     }
-    else {
-        // Um filho
-        printf("Um filho\n");
-        
-        node_t* child = node->left ? node->left : node->right;
-        
-        if (parent->left == node) parent->left = child;
-        else parent->right = child;
-    }
+    
+    return node;
 }

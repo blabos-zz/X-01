@@ -15,6 +15,9 @@ int main(int argc, char** argv) {
     
     int key = argc == 2 ? atoi(argv[1]) : 0;
     
+    printf("size: %d\n", count_nodes(root));
+    printf("leaf: %d\n", count_leaves(root));
+    
     ins_node(&root, 5);
     ins_node(&root, 1);
     ins_node(&root, 3);
@@ -27,6 +30,9 @@ int main(int argc, char** argv) {
     ins_node(&root, 0);
     ins_node(&root, 10);
     
+    printf("size: %d\n", count_nodes(root));
+    printf("leaf: %d\n", count_leaves(root));
+    
     printf("\nIN-OREDER\n");
     print_in(root);
     
@@ -35,6 +41,9 @@ int main(int argc, char** argv) {
     
     printf("\nIN-OREDER\n");
     print_in(root);
+    
+    printf("size: %d\n", count_nodes(root));
+    printf("leaf: %d\n", count_leaves(root));
     
     return EXIT_SUCCESS;
 }
