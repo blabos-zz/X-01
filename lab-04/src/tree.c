@@ -31,6 +31,7 @@ node_t* ins_node(node_t** node, int key) {
         (*node) = (node_t*)malloc(sizeof(node_t));
         if (*node) {
             (*node)->key = key;
+            (*node)->left = (*node)->right = NULL;
         }
         return (*node);
     }
@@ -55,7 +56,7 @@ node_t* max_node(node_t* node) {
 }
 
 node_t* min_node(node_t* node) {
-    if (node->left) return min_node(node->left);
+    if (node && node->left) return min_node(node->left);
     else return node;
 }
 
@@ -69,7 +70,12 @@ void find_parent(node_t* root, int key, node_t** node, node_t** parent) {
     (*node) = (*parent) = NULL;
     
     if (root) {
-        if (key < root->key) {
+        if (key == root->key) {
+            (*node)     = root;
+            (*parent)   = NULL;
+            printf("%d: ===> %p -> %p\n", key, (*node), (*parent));
+        }
+        else if (key < root->key) {
             if (root->left && (key == root->left->key)) {
                 (*node)     = root->left;
                 (*parent)   = root;
@@ -159,49 +165,36 @@ void _print_node(node_t* node, int level) {
 
 
 node_t* _del_node(node_t** root, int key) {
-    node_t* node    = NULL;
-    node_t* parent  = NULL;
+    node_t* node;
+    node_t* pnode;
+    node_t* replacer;
     
-    find_parent(*root, key, &node, &parent);
+    find_parent(*root, key, &node, &pnode);
     
     if (node) {
         if (node->left && node->right) {
-            // Dois filhos
-            printf("Dois filhos\n");
-            
-            node_t* replacer = min_node(node->right);
+            replacer = min_node(node->right);
+        }
+        else {
+            replacer = node->left ? max_node(node->left) : min_node(node->right);
+        }
+        
+        if (replacer) {
             _del_node(root, replacer->key);
-            
-            if (parent) {
-                if (parent->left == node)
-                    parent->left = replacer;
-                else
-                    parent->right = replacer;
-            }
-            else {
-                (*root) = replacer;
-            }
-            
             replacer->left  = node->left;
             replacer->right = node->right;
         }
-        else if (!node->left && !node->right) {
-            // Sem filhos
-            printf("Sem filhos\n");
-            
-            if (parent) {
-                if (parent->left == node) parent->left = NULL;
-                else parent->right = NULL;
+                
+        if (pnode) {
+            if (node->key < pnode->key) {
+                pnode->left = replacer;
+            }
+            else {
+                pnode->right = replacer;
             }
         }
         else {
-            // Um filho
-            printf("Um filho\n");
-            
-            node_t* child = node->left ? node->left : node->right;
-            
-            if (parent->left == node) parent->left = child;
-            else parent->right = child;
+            (*root) = replacer;
         }
     }
     
