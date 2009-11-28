@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>equal.c</title>
+</head>
+<body>
+<pre>
+<span style='color: #0000ff'><i>/**</i></span>
+<span style='color: #0000ff'><i> * equal.c</i></span>
+<span style='color: #0000ff'><i> * </i></span>
+<span style='color: #0000ff'><i> * 17 - Implemente uma função que compare se duas árvores binárias são iguais.</i></span>
+<span style='color: #0000ff'><i> *</i></span>
+<span style='color: #0000ff'><i> *  Created on: 23/11/2009</i></span>
+<span style='color: #0000ff'><i> *      Author: wesley</i></span>
+<span style='color: #0000ff'><i> */</i></span>
+
+<span style='color: #141312'><b>struct</b> node_st {</span>
+<span style='color: #141312'>    </span><span style='color: #0057ae'>int</span><span style='color: #141312'>             key;</span>
+<span style='color: #141312'>    <b>struct</b> node_st* left;</span>
+<span style='color: #141312'>    <b>struct</b> node_st* right;</span>
+<span style='color: #141312'>};</span>
+
+<span style='color: #141312'><b>typedef</b> <b>struct</b> node_st node_t;</span>
+
+
+<span style='color: #0000ff'><i>/**</i></span>
+<span style='color: #0000ff'><i> * Dada duas sub-árvores quaisquer, dizemos que elas são iguais se as chaves</i></span>
+<span style='color: #0000ff'><i> * de suas raízes forem iguais e se as sub-árvores correspondentes (à direita</i></span>
+<span style='color: #0000ff'><i> * e à esquerda) de cada uma também forem iguais, ou seja, se cada nó desde a</i></span>
+<span style='color: #0000ff'><i> * raiz tiver a mesma chave e os mesmos filhos.</i></span>
+<span style='color: #0000ff'><i> */</i></span>
+<span style='color: #0057ae'>int</span><span style='color: #141312'> equal(node_t* t1, node_t* t2) {</span>
+<span style='color: #141312'>    <b>if</b> (t1 &amp;&amp; t2) {</span>
+<span style='color: #141312'>        </span><span style='color: #0000ff'><i>/**</i></span>
+<span style='color: #0000ff'><i>         * Se ambos os nós são não-nulos, então verificamos se as chaves são</i></span>
+<span style='color: #0000ff'><i>         * iguais e se as sub-árvores também são.</i></span>
+<span style='color: #0000ff'><i>         */</i></span>
+<span style='color: #141312'>        <b>return</b> (</span>
+<span style='color: #141312'>            (t1-&gt;key == t2-&gt;key) &amp;&amp;</span>
+<span style='color: #141312'>            equal(t1-&gt;left, t2-&gt;left) &amp;&amp;</span>
+<span style='color: #141312'>            equal(t1-&gt;right, t2-&gt;right)</span>
+<span style='color: #141312'>        );</span>
+<span style='color: #141312'>    }</span>
+<span style='color: #141312'>    <b>else</b> <b>if</b> (t1 || t2) {</span>
+<span style='color: #141312'>        </span><span style='color: #0000ff'><i>/**</i></span>
+<span style='color: #0000ff'><i>         * Se somente um nó é não-nulo, então eles são necessariamente</i></span>
+<span style='color: #0000ff'><i>         * diferentes.</i></span>
+<span style='color: #0000ff'><i>         */</i></span>
+<span style='color: #141312'>        <b>return</b> </span><span style='color: #b08000'>0</span><span style='color: #141312'>;</span>
+<span style='color: #141312'>    }</span>
+<span style='color: #141312'>    <b>else</b> {</span>
+<span style='color: #141312'>        </span><span style='color: #0000ff'><i>/**</i></span>
+<span style='color: #0000ff'><i>         * Se os dois nós são nulos, então eles são idênticos.</i></span>
+<span style='color: #0000ff'><i>         */</i></span>
+<span style='color: #141312'>        <b>return</b> </span><span style='color: #b08000'>1</span><span style='color: #141312'>;</span>
+<span style='color: #141312'>    }</span>
+<span style='color: #141312'>}</span>
+</pre></body>
+</html>
