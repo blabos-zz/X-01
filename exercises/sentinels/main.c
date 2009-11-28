@@ -19,7 +19,7 @@ int main(void) {
     
     print_list(list);
     
-    node = find(list, 2);
+    node = find(list, head(list)->data);
     delete(list, node);
     
     printf("\n");

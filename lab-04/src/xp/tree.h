@@ -9,35 +9,18 @@
 #define TREE_H_
 
 
-struct node_st {
-    char            key;
-    struct node_st* left;
-    struct node_st* right;
-};
-
-typedef struct node_st node_t;
+#include "data.h"
 
 
-node_t*     new_tree();
-void        del_tree(node_t**);
+tnode_t*    new_tree();
+void        del_tree(tnode_t**);
 
-node_t*     new_node(char);
+tnode_t*    new_tnode(char);
+tnode_t*    make_sub_tree(tnode_t*, tnode_t*, tnode_t*);
 
-node_t*     ins_node(node_t**, int);
-void        del_node(node_t**, int);
+tnode_t*    make_parse_tree(char*);
 
-node_t*     max_node(node_t*);
-node_t*     min_node(node_t*);
-
-node_t*     find_node(node_t*, int);
-void        find_parent(node_t*, int, node_t**, node_t**);
-
-void        print_in(node_t*);
-void        print_pre(node_t*);
-void        print_pos(node_t*);
-
-int         count_nodes(node_t*);
-int         count_leaves(node_t*);
+void        print_in(tnode_t*);
 
 
 #endif /* TREE_H_ */
