@@ -19,6 +19,7 @@ tnode_t*    new_tnode(char);
 tnode_t*    make_sub_tree(tnode_t*, tnode_t*, tnode_t*);
 
 tnode_t*    make_parse_tree(char*);
+void        print_expr(tnode_t*);
 
 void        print_in(tnode_t*);
 

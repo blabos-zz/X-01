@@ -46,14 +46,14 @@ void print_list(list_t* list) {
 }
 
 void print_lnode(lnode_t* lnode) {
-    printf("{%8p <- %8p -> %8p} => [%8p <- %8p -> %8p]: (%c - %c)\n",
+    printf("{%8p <- %8p -> %8p} => [%8p <- %8p -> %8p]: <%d = %c>\n",
             lnode->prev, lnode, lnode->next,
             lnode->data->left, lnode->data, lnode->data->right,
             lnode->data->type, lnode->data->key);
 }
 
 void print_tnode(tnode_t* tnode) {
-    printf("[%8p <- %8p -> %8p]: (%c - %c)\n",
+    printf("[%8p <- %8p -> %8p]: <%d = %c>\n",
             tnode->left, tnode, tnode->right, tnode->type, tnode->key);
 }
 
@@ -115,13 +115,14 @@ int has_oto(list_t* list) {
     lnode_t* h2 = h1->next;
     lnode_t* h3 = h2->next;
     
-    return ((h1->data->type == 'O') &&
-            (h2->data->type == 'T') &&
-            (h3->data->type == 'O'));
-}
-
-int has_C(list_t* list) {
-    return head(list)->data->type == 'C';
+    return (
+        (h1->data->type == operand) &&
+        (h3->data->type == operand) &&
+        (
+            (h2->data->type == high_operator) ||
+            (h2->data->type == low_operator)
+        )
+    );
 }
 
 

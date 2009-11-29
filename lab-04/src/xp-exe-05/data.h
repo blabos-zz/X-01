@@ -8,9 +8,20 @@
 #ifndef DATA_H_
 #define DATA_H_
 
+typedef enum {
+    high_operator,      // Operadores * e /
+    low_operator,       // Opreadores + e -
+    open_parentesis,    // (
+    close_parentesis,   // )
+    operand,            // Dígitos de 0 a 9
+    end_of_expression,  // Final da string
+    unknown_token,      // Qualquer coisa desconhecida
+    leaf                // Uma folha processada
+} token_type_t;
+
 typedef struct tnode_st {
     char                key;
-    char                type;
+    token_type_t        type;
     struct tnode_st*    left;
     struct tnode_st*    right;
 } tnode_t;
