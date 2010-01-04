@@ -1,0 +1,6 @@
+Debug
+Release
+*.o
+*.d
+.project
+.cproject
