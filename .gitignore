@@ -4,3 +4,4 @@ Release
 *.d
 .project
 .cproject
+*.class
