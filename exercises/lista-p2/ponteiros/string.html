@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>string.cpp</title>
+</head>
+<body>
+<pre>
+<span style='color: #0000ff'><i>/**</i></span>
+<span style='color: #0000ff'><i> *  Author: wesley</i></span>
+<span style='color: #0000ff'><i> *  </i></span>
+<span style='color: #0000ff'><i> * 09 - Faça uma função que verifique se a expressão apontada por substr está</i></span>
+<span style='color: #0000ff'><i> * presente na cadeia apontada por str. A função possui o protótipo abaixo:</i></span>
+<span style='color: #0000ff'><i> *      int posicao(char *substr, char *str);</i></span>
+<span style='color: #0000ff'><i> * e retorna a posição em que a sub-cadeia aparece em cadeia.</i></span>
+<span style='color: #0000ff'><i> *  </i></span>
+<span style='color: #0000ff'><i> * Código devidamete chupinhado do exercício 9 (que coincidência!) da lista</i></span>
+<span style='color: #0000ff'><i> * para a P2 (denovo!) da matéria CC2621 do semestre passado, esboçando a</i></span>
+<span style='color: #0000ff'><i> * técnica de reaproveitamento de código.</i></span>
+<span style='color: #0000ff'><i> * </i></span>
+<span style='color: #0000ff'><i> * http://github.com/blabos/CC3651/commit/5588edef480301c0a9caebfe9307aa62f36aa8c5</i></span>
+<span style='color: #0000ff'><i> */</i></span>
+
+<span style='color: #0000ff'><i>/**</i></span>
+<span style='color: #0000ff'><i> * Calcula o comprimento de uma string.</i></span>
+<span style='color: #0000ff'><i> * </i></span>
+<span style='color: #0000ff'><i> * </i></span><span style='color: #ca60ca'><b>@param</b></span><span style='color: #0000ff'><i> </i></span><span style='color: #0095ff'><b>const</b></span><span style='color: #0000ff'><i> char* String.</i></span>
+<span style='color: #0000ff'><i> * </i></span>
+<span style='color: #0000ff'><i> * </i></span><span style='color: #ca60ca'><b>@return</b></span><span style='color: #0000ff'><i> int Comprimento da string.</i></span>
+<span style='color: #0000ff'><i> */</i></span>
+<span style='color: #0057ae'>int</span><span style='color: #141312'> strlen(</span><span style='color: #0057ae'>const</span><span style='color: #141312'> </span><span style='color: #0057ae'>char</span><span style='color: #141312'>* str) {</span>
+<span style='color: #141312'>    </span><span style='color: #0057ae'>int</span><span style='color: #141312'> length = </span><span style='color: #b08000'>0</span><span style='color: #141312'>;</span>
+<span style='color: #141312'>    <b>while</b> (str[length] != </span><span style='color: #ff80e0'>'\0'</span><span style='color: #141312'>) length++;</span>
+<span style='color: #141312'>    </span>
+<span style='color: #141312'>    <b>return</b> length;</span>
+<span style='color: #141312'>}</span>
+
+<span style='color: #0000ff'><i>/** </i></span>
+<span style='color: #0000ff'><i> * Procura a primeira ocorrência de word dentro de phrase.</i></span>
+<span style='color: #0000ff'><i> * </i></span>
+<span style='color: #0000ff'><i> * </i></span><span style='color: #ca60ca'><b>@param</b></span><span style='color: #0000ff'><i> </i></span><span style='color: #0095ff'><b>const</b></span><span style='color: #0000ff'><i> char* A frase onde procurar.</i></span>
+<span style='color: #0000ff'><i> * </i></span><span style='color: #ca60ca'><b>@param</b></span><span style='color: #0000ff'><i> </i></span><span style='color: #0095ff'><b>const</b></span><span style='color: #0000ff'><i> char* O texto a procurar.</i></span>
+<span style='color: #0000ff'><i> * </i></span>
+<span style='color: #0000ff'><i> * </i></span><span style='color: #ca60ca'><b>@return</b></span><span style='color: #0000ff'><i> a posição do primeiro caracter do texto encontrado ou -1 se não</i></span>
+<span style='color: #0000ff'><i> * encontrar.</i></span>
+<span style='color: #0000ff'><i> */</i></span>
+<span style='color: #0057ae'>int</span><span style='color: #141312'> findstr(</span><span style='color: #0057ae'>const</span><span style='color: #141312'> </span><span style='color: #0057ae'>char</span><span style='color: #141312'>* phrase, </span><span style='color: #0057ae'>const</span><span style='color: #141312'> </span><span style='color: #0057ae'>char</span><span style='color: #141312'>* word) {</span>
+<span style='color: #141312'>    </span><span style='color: #0057ae'>int</span><span style='color: #141312'> phlen = strlen(phrase);</span>
+<span style='color: #141312'>    </span><span style='color: #0057ae'>int</span><span style='color: #141312'> wrlen = strlen(word);</span>
+<span style='color: #141312'>    </span><span style='color: #0057ae'>int</span><span style='color: #141312'> i = -</span><span style='color: #b08000'>1</span><span style='color: #141312'>;</span>
+<span style='color: #141312'>    </span>
+<span style='color: #141312'>    <b>while</b> (i &lt; (phlen - wrlen)) {</span>
+<span style='color: #141312'>        i++;</span>
+<span style='color: #141312'>        </span><span style='color: #0057ae'>int</span><span style='color: #141312'> j = </span><span style='color: #b08000'>0</span><span style='color: #141312'>;</span>
+<span style='color: #141312'>        <b>while</b> ((phrase[i] == word[j]) &amp;&amp; (j &lt; wrlen)) {</span>
+<span style='color: #141312'>            i++;</span>
+<span style='color: #141312'>            j++;</span>
+<span style='color: #141312'>        }</span>
+<span style='color: #141312'>        <b>if</b> (j == wrlen) <b>return</b> i - j;</span>
+<span style='color: #141312'>    }</span>
+<span style='color: #141312'>    </span>
+<span style='color: #141312'>    <b>return</b> -</span><span style='color: #b08000'>1</span><span style='color: #141312'>;</span>
+<span style='color: #141312'>}</span>
+</pre></body>
+</html>

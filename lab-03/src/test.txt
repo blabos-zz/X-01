@@ -1,0 +1,20 @@
+Motivação
+
+Perl é de longe uma das mais divertidas, interessantes e produtivas linguagens que existem. Após a Iluminação, mitos de nós elevamos nossa paixão a um estado de fé. Nós amamos Perl.
+
+Perl foi desenhada para tornar as coisas simples, simples, e as coisas complexas, possíveis. Por isso nós fazemos uma infinidade de coisas de formas muuito mais simples que em outras linguagens.
+
+Em alguns momentos no entanto, precisamos de funcionalidades que outras linguagens fornecem melhor, ou mis rápido, ou que já está pronto, ou ainda precisamos integrar várias soluções diferentes escritas em linguagens distintas. Ao invés de reinventar a roda, reimplementando ou tentando otimizar soluções para as quais a linguagem não foi projetada, Perl possui técnicas para se comunicar com outras linguagens, obtendo o melhor dos dois mundos.
+
+Mesmo neste caso específico "há mais de uma forma de fazer". Existe mais de uma forma defazer com que Perl converse com outras linguagens,
+Embedding
+Inline
+Swig
+XS
+ Variáveis
+ API
+ typemap
+Integra com Fortran
+integra com C++
+
+ 
