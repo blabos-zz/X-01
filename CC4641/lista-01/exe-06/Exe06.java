@@ -58,8 +58,8 @@ class Exe06 {
     private static void init(int[][] mat, int n) {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                //mat[i][j] = 1;
-                mat[i][j] = i + j;
+                mat[i][j] = 1;
+                //mat[i][j] = i + j;
             }
         }
     }
