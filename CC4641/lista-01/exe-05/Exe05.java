@@ -1,4 +1,4 @@
-class Exe05 {
+public class Exe05 {
     public static void main(String[] args) {
         int base        = 0;
         int sub         = 0;
