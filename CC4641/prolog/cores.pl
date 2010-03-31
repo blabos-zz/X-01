@@ -34,6 +34,11 @@ veste(rosa, Y, Z) :- valida(rosa, Y, Z), ((Y = verde, Z \= azul, Z \= lilas); (Z
 veste(X, Y, Z) :- pessoa(X), ((Y = vermelho, Z \= vermelho); (Y \= vermelho, Z = vermelho)).
 
 % Uma das cores é usada tanto por Barbara como por Rosa.
+
+% Objetivo:
+% Alexandra: Vm e Az.
+% Barbara: Am e Li.
+% Rosa: Vd e Am.
     
 % Alexandra e Barbara tem 04 cores entre elas.
 veste(alexandra, X, Y) :- veste(barbara, Z, W), X \= Z, X \= W, Y \= Z, Y \= W.
