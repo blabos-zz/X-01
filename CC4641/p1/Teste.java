@@ -31,7 +31,7 @@ class Filha extends Mae {
         System.out.println("Filha.m1()");
     }
     
-    public static void m2() {
+    public void m2() {
         System.out.println("Filha.m2()");
     }
 };
