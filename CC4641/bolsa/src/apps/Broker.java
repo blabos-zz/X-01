@@ -1,11 +1,19 @@
 package bolsa;
 
+
+import java.util.Random;
+
+
 public class Broker {
 
     private Random r;
+    
+    public Broker() {
+    	this.r = new Random();
+    }
 
     public synchronized Response send(Order ord) {
-        return exchange.negotiate(ord);
+        return negotiate(ord);
     }
     
     private Response negotiate(Order ord) {
@@ -26,7 +34,7 @@ public class Broker {
                 total = value;
             }
             else {
-                quota = total = 0.0;
+                quota = total = 0;
             }
         }
         else {
@@ -38,7 +46,7 @@ public class Broker {
                 total = value * quota;
             }
             else {
-                value = total = 0.0;
+                value = total = 0;
             }
         }
         
@@ -46,6 +54,6 @@ public class Broker {
     }
     
     private boolean operationDone() {
-        return r.nextInt(10) % 2;
+        return (r.nextInt(10) % 2) == 0;
     }
 };
