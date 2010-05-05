@@ -11,9 +11,9 @@ public class Client extends Thread {
     private float balance;
     
     public Client(Broker br) {
-        this.broker		= br;
-        this.balance	= 10000;
-        this.r			= new Random();
+        this.broker     = br;
+        this.balance    = 10000;
+        this.r          = new Random();
     }
 
     public void run() {
