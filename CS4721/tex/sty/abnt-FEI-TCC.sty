@@ -1,0 +1,61 @@
+%% Este sty é baseado em um documento produzido pela UFSC
+%% Autor original: Jonathann (http://anotacoes.wetpaint.com/account/jonathann)
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{sty/abnt-FEI-TCC}
+
+% citações na forma alf
+\RequirePackage[alf]{abntcite}
+
+% abnt na forma alfa (como as normas abnt)
+\RequirePackage{abnt-alf}
+
+\RequirePackage{url}
+\RequirePackage[brazil]{babel}
+
+% estilo da bibliografia
+\bibliographystyle{abnt-alf}
+
+% para que entenda o @
+\makeatletter
+
+
+%%%%%%%%%%%%%%%%%%%%%
+%%%% R E S U M O %%%%
+%%%%%%%%%%%%%%%%%%%%%
+%tira a identação da primeira linha (parágrafo)
+\renewenvironment{resumo}%
+{%
+\if@openright\cleardoublepage\else\clearpage\fi%
+\setchaptertype{resumo}
+\pretextualchapter{\resumoname}%
+\begin{espacosimples}%
+\setlength{\parindent}{0cm}
+}%
+{
+\setlength{\parindent}{.7cm}
+\end{espacosimples}\newpage
+}%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% A B S T R A C T %%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%tira a identação da primeira linha (parágrafo)
+\renewenvironment{abstract}%
+{%
+\if@openright\cleardoublepage\else\clearpage\fi%
+\setchaptertype{abstract}
+\pretextualchapter{\ABNTabstractname}%
+\begin{espacosimples}%
+\setlength{\parindent}{0cm}
+}%
+{
+\setlength{\parindent}{0.7cm}
+\end{espacosimples}\newpage
+}%abstract
+
+
+% altera os tíulos de referência e anexo para ficarem em maiúsculo
+\renewcommand{\ABNTbibliographyname}{REFER\^ENCIAS}
+\renewcommand{\annexname}{ANEXOS}
