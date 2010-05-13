@@ -10,7 +10,8 @@ public class Client extends Thread {
     private Broker broker;
     private float balance;
     
-    public Client(Broker br) {
+    public Client(Broker br, String name) {
+	super(name);
         this.broker     = br;
         this.balance    = 10000;
         this.r          = new Random();
@@ -33,7 +34,8 @@ public class Client extends Thread {
                 ord = new SellOrder(symbol, quota, limit);
             }
             
-            Debug.print("New Order");
+            Debug.print();
+            Debug.print(getName() + " sending New Order");
             Debug.print(ord.toXML());
             Response res = broker.send(ord);
             
@@ -53,18 +55,18 @@ public class Client extends Thread {
     }
     
     private void updateAccount(Response res) {
+        Debug.print();
+        Debug.print("*** Trade Result (" + getName() + ") ***");
         if (res.getOperation() == 1) {
-            Debug.print("Trade Result:");
-            
             this.balance -= res.getTotal();
         }
         else {
-            Debug.print("Sale Result:");
     	    this.balance += res.getTotal();
         }
         
         Debug.print(res.toXML());
         Debug.print("Current Balance: " + this.balance);
+        Debug.print();
     }
     
     private boolean wantBuy() {
