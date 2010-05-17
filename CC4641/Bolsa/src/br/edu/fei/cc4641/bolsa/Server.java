@@ -3,13 +3,16 @@ import java.net.*;
 import java.io.*;
 
 public class Server extends Thread {
-	private int port;
+	private int port			= 7070;
 	private ServerSocket server = null;
 	
-	private boolean stop = false;
+	private boolean stop 		= false;
+	
+	private Console console		= null;
 	
 	public Server(int port) {
-		this.port = ((port > 1023) && (port < 65536)) ? port: 7070;
+		this.port		= ((port > 1023) && (port < 65536)) ? port: 7070;
+		this.console	= new Console(this);
 		start();
 	}
 	
@@ -21,10 +24,10 @@ public class Server extends Thread {
 		stop = true;
 		
 		try {
+			server.close();
 			sleep(3000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		}
+		catch (Exception e) {}
 		
 		if (isAlive()) interrupt();
 	}
@@ -38,16 +41,15 @@ public class Server extends Thread {
 			return;
 		}
 		
+		console.start();
+		
 		while(!canStop()) {
-			System.out.println("Server Ready");
-			
 			try {
 				@SuppressWarnings("unused")
 				Client client = new Client(server.accept());
 				System.out.println("Processing new client");
 			} catch (IOException e) {
 				System.err.println(e.getMessage());
-				e.printStackTrace();
 			}
 		}
 	}
@@ -95,8 +97,6 @@ class Client extends Thread {
 		while (!canStop()) {
 			Message msg = null;
 			Message res = null;
-			
-			System.out.println("Client...");
 			
 			msg = getMsg();
 			
@@ -283,7 +283,6 @@ class Client extends Thread {
 					
 					if (unitValue <= limit) {
 						maxVolume = maxVolume >= value ? value : maxVolume;
-						System.out.println("MxV2: " + maxVolume);
 						double quota = maxVolume / unitValue;
 						share.decMaxQuotas(quota);
 						resp.put("quota", quota);
@@ -306,5 +305,111 @@ class Client extends Thread {
 		}
 		
 		return resp;
+	}
+}
+
+
+class Console extends Thread {
+	private Server server			= null;
+	private boolean stop			= false;
+	
+	private BufferedReader stdin	= null;
+    private PrintStream stdout		= null;
+    private PrintStream stderr		= null;
+	
+	public Console(Server server) {
+		this.server = server;
+	}
+	
+	@Override
+	protected void finalize() throws Throwable {
+		stopMe();
+		super.finalize();
+	}
+	
+	public synchronized boolean canStop() {
+		return stop;
+	}
+	
+	public synchronized void stopMe() {
+		stop = true;
+		
+		try {
+			sleep(3000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		if (isAlive()) interrupt();
+	}
+	
+	public void run() {
+		stdin	= new BufferedReader(new InputStreamReader(System.in));
+		stdout	= System.out;
+		stderr	= System.err;
+		
+		System.out.println("Market Console");
+		while(!canStop()) {
+			try {
+				prompt();
+				execute(nextCmd());
+			} catch (IOException e) {
+				System.err.println(e.getMessage());
+				e.printStackTrace();
+			}
+		}
+		
+		stopSever();
+	}
+
+	private void execute(String cmd) {
+		if (cmd == null || cmd.equals("exit")) {
+			exitMe();
+		}
+		else if (cmd.equals("help")) {
+			printHelp();
+		}
+		else {
+			error(cmd);
+		}
+	}
+
+	private void exitMe() {
+		stopMe();
+	}
+
+	private void error(String cmd) {
+		if (cmd.length() > 0) {
+			stderr.println("Invalid command '" + cmd + "'");
+		}
+	}
+
+	private void stopSever() {
+		if (server.isAlive()) {
+			server.stopMe();
+		}
+	}
+
+	private void printHelp() {
+		stdout.println("Market Server Help");
+		stdout.println("Commands:");
+		stdout.println("    help - Displays this message.");
+		stdout.println("    exit - Exits and stops the server.");
+	}
+
+	void prompt() {
+		stdout.print("# ");
+	}
+
+	private String nextCmd() throws IOException {
+		String line = null;
+		try {
+			line = stdin.readLine().toLowerCase();
+		}
+		catch (Exception e) {}
+		
+		if (line == null) stdout.print("EOF");
+		
+		return line; 
 	}
 }

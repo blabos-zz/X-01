@@ -22,106 +22,6 @@ public class Client {
     private static PrintStream stdout	= null;
     private static PrintStream stderr	= null;
 	
-	public static void main(String[] args) {
-		int cmd = NULL;
-		Message msg = null;
-		stdin	= new BufferedReader(new InputStreamReader(System.in));
-		stdout	= System.out;
-		stderr	= System.err;
-		
-		while (cmd != EXIT) {
-			if (reconnect()) {
-				if ((cmd = command()) == EXIT) continue;
-				
-				msg = collect();
-				
-				if (msg != null) {
-					send(msg);
-					msg = receive();
-					show(msg);
-				}
-				else {
-					cmd = EXIT;
-				}
-			}
-			
-			if (retries >= MAX_RETRIES) {
-				stderr.println("Cannot connect to " + host + ":" + port);
-				cmd = EXIT;
-			}
-		}
-		stdout.println();
-	}
-
-	private static void show(Message msg) {
-		if (msg != null) {
-			stdout.println("\nMarket Response:");
-			
-			int oper = msg.asInt("operation");
-			
-			if (oper == Operation.info) {
-				showInfo(msg);
-			}
-			else if (oper == Operation.greeting) {
-				showGreeting(msg);
-			}
-			else {
-				stdout.println(msg.toXML());
-			}
-		}
-		else stdout.println("Invalid response received");
-	}
-
-	private static void showGreeting(Message msg) {
-		String greet = msg.asString("greet");
-		stdout.println(greet);
-	}
-
-	private static void showInfo(Message msg) {
-		MarketInfo info = new MarketInfo(msg);
-		info.print();
-	}
-
-	private static int command() {
-		int cmd = EXIT;
-		
-		stdout.println("\nNext Command:");
-		stdout.println(EXIT + " - Exit");
-		stdout.println(SEND + " - Send new order");
-		prompt();
-		try {
-			cmd = Integer.parseInt(stdin.readLine());
-		}
-		catch (Exception e) {
-			stderr.println("EOF");
-		}
-		
-		return cmd;
-	}
-
-	private static Message receive() {
-		Message msg = null;
-		String line = "";
-		try {
-			line = in.readLine();
-			msg = new Message(line);
-		}
-		catch (Exception e) {
-			stderr.println(e.getMessage());
-		}
-		
-		return msg;
-	}
-
-	private static void send(Message msg) {
-		try {
-			out.println(msg.toStr());
-		}
-		catch (Exception e) {
-			stderr.println(e.getMessage());
-		}
-	}
-
 	private static Message collect() {
 		Message msg = null;
 		
@@ -175,8 +75,70 @@ public class Client {
 		return msg;
 	}
 
+	private static int command() {
+		int cmd = EXIT;
+		
+		stdout.println("\nNext Command:");
+		stdout.println(EXIT + " - Exit");
+		stdout.println(SEND + " - Send new order");
+		prompt();
+		try {
+			cmd = Integer.parseInt(stdin.readLine());
+		}
+		catch (Exception e) {
+			stderr.println("EOF");
+		}
+		
+		return cmd;
+	}
+
+	public static void main(String[] args) {
+		int cmd = NULL;
+		Message msg = null;
+		stdin	= new BufferedReader(new InputStreamReader(System.in));
+		stdout	= System.out;
+		stderr	= System.err;
+		
+		while (cmd != EXIT) {
+			if (reconnect()) {
+				if ((cmd = command()) == EXIT) continue;
+				
+				msg = collect();
+				
+				if (msg != null) {
+					send(msg);
+					msg = receive();
+					show(msg);
+				}
+				else {
+					cmd = EXIT;
+				}
+			}
+			
+			if (retries >= MAX_RETRIES) {
+				stderr.println("Cannot connect to " + host + ":" + port);
+				cmd = EXIT;
+			}
+		}
+		stdout.println();
+	}
+
 	private static void prompt() {
-		stdout.print("% ");
+		stdout.print("$ ");
+	}
+
+	private static Message receive() {
+		Message msg = null;
+		String line = "";
+		try {
+			line = in.readLine();
+			msg = new Message(line);
+		}
+		catch (Exception e) {
+			stderr.println(e.getMessage());
+		}
+		
+		return msg;
 	}
 
 	private static boolean reconnect() {
@@ -210,6 +172,44 @@ public class Client {
             
         retries++;
 		return false;
+	}
+
+	private static void send(Message msg) {
+		try {
+			out.println(msg.toStr());
+		}
+		catch (Exception e) {
+			stderr.println(e.getMessage());
+		}
+	}
+
+	private static void show(Message msg) {
+		if (msg != null) {
+			stdout.println("\nMarket Response:");
+			
+			int oper = msg.asInt("operation");
+			
+			if (oper == Operation.info) {
+				showInfo(msg);
+			}
+			else if (oper == Operation.greeting) {
+				showGreeting(msg);
+			}
+			else {
+				stdout.println(msg.toXML());
+			}
+		}
+		else stdout.println("Invalid response received");
+	}
+
+	private static void showGreeting(Message msg) {
+		String greet = msg.asString("greet");
+		stdout.println(greet);
+	}
+
+	private static void showInfo(Message msg) {
+		MarketInfo info = new MarketInfo(msg);
+		info.print();
 	}
 
 }
