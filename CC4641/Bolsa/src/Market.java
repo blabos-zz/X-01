@@ -5,7 +5,7 @@ public class Market {
 		Book.init();
 		
 		@SuppressWarnings("unused")
-		Server server = new Server(7070);
+		MarketServer server = new MarketServer(7070);
 	}
 
 }

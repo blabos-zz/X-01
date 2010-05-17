@@ -2,7 +2,7 @@ package br.edu.fei.cc4641.bolsa;
 import java.net.*;
 import java.io.*;
 
-public class Server extends Thread {
+public class MarketServer extends Thread {
 	private int port			= 7070;
 	private ServerSocket server = null;
 	
@@ -10,7 +10,7 @@ public class Server extends Thread {
 	
 	private Console console		= null;
 	
-	public Server(int port) {
+	public MarketServer(int port) {
 		this.port		= ((port > 1023) && (port < 65536)) ? port: 7070;
 		this.console	= new Console(this);
 		start();
@@ -20,12 +20,14 @@ public class Server extends Thread {
 		return stop;
 	}
 	
-	public synchronized void stopMe() {
-		stop = true;
+	public void stopMe() {
+		synchronized (this) {
+			stop = true;
+		}
 		
 		try {
 			server.close();
-			sleep(3000);
+			sleep(100);
 		}
 		catch (Exception e) {}
 		
@@ -46,7 +48,7 @@ public class Server extends Thread {
 		while(!canStop()) {
 			try {
 				@SuppressWarnings("unused")
-				Client client = new Client(server.accept());
+				MarketClient client = new MarketClient(server.accept());
 				System.out.println("Processing new client");
 			} catch (IOException e) {
 				System.err.println(e.getMessage());
@@ -55,7 +57,7 @@ public class Server extends Thread {
 	}
 }
 
-class Client extends Thread {
+class MarketClient extends Thread {
 	private Socket client		= null;
 	private PrintWriter out 	= null;
 	private BufferedReader in	= null;
@@ -66,8 +68,10 @@ class Client extends Thread {
 		return stop;
 	}
 	
-	public synchronized void stopMe() {
-		stop = true;
+	public void stopMe() {
+		synchronized (this) {
+			stop = true;
+		}
 		
 		try {
 			sleep(3000);
@@ -78,7 +82,7 @@ class Client extends Thread {
 		if (isAlive()) interrupt();
 	}
 	
-	public Client(Socket client) {
+	public MarketClient(Socket client) {
 		this.client = client;
 		try {
 			out	= new PrintWriter(this.client.getOutputStream(), true);
@@ -310,14 +314,14 @@ class Client extends Thread {
 
 
 class Console extends Thread {
-	private Server server			= null;
+	private MarketServer server			= null;
 	private boolean stop			= false;
 	
 	private BufferedReader stdin	= null;
     private PrintStream stdout		= null;
     private PrintStream stderr		= null;
 	
-	public Console(Server server) {
+	public Console(MarketServer server) {
 		this.server = server;
 	}
 	
@@ -331,16 +335,10 @@ class Console extends Thread {
 		return stop;
 	}
 	
-	public synchronized void stopMe() {
-		stop = true;
-		
-		try {
-			sleep(3000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+	public void stopMe() {
+		synchronized (this) {
+			stop = true;
 		}
-		
-		if (isAlive()) interrupt();
 	}
 	
 	public void run() {
