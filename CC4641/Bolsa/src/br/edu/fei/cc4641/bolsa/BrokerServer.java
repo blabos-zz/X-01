@@ -63,6 +63,7 @@ public class BrokerServer extends Thread {
 	public void run() {
 		while(!canStop()) {
 			try {
+				@SuppressWarnings("unused")
 				BrokerClient client = new BrokerClient(this, server.accept());
 				System.out.println("Processing new client");
 			} catch (IOException e) {
@@ -169,7 +170,7 @@ class BrokerClient extends Thread {
 			
 			msg = new Message(line);
 			
-			msg.validateHeader();
+			msg.checkHeader();
 		} catch (IOException e) {
 			System.out.println(e.getMessage()
 					+ ". Closing client connection");
@@ -177,7 +178,7 @@ class BrokerClient extends Thread {
 		catch (Exception e) {
 			System.out.println(e.getMessage());
 			msg = new Message();
-			msg.put("operation", Operation.error);
+			msg.put("operation", Operation.ERROR);
 			msg.put("error", e.getMessage());
 			out.println(msg.toStr());
 			msg = null;

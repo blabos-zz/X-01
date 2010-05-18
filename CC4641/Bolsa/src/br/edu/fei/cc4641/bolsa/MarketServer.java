@@ -112,16 +112,16 @@ class MarketClient extends Thread {
 			System.out.println(msg.toXML());
 			
 			switch (msg.asInt("operation")) {
-				case Operation.buy:
+				case Operation.BUY:
 					res = procBuy(msg);
 					break;
-				case Operation.sell:
+				case Operation.SELL:
 					res = procSell(msg);
 					break;
-				case Operation.info:
+				case Operation.INFO_REQUEST:
 					res = procInfo(msg);
 					break;
-				case Operation.greeting:
+				case Operation.GREETING:
 					res = procGreeting(msg);
 					break;
 				default:
@@ -143,7 +143,7 @@ class MarketClient extends Thread {
 			
 			msg = new Message(line);
 			
-			msg.validateHeader();
+			msg.checkHeader();
 		} catch (IOException e) {
 			System.out.println(e.getMessage()
 					+ ". Closing client connection");
@@ -151,7 +151,7 @@ class MarketClient extends Thread {
 		catch (Exception e) {
 			System.out.println(e.getMessage());
 			msg = new Message();
-			msg.put("operation", Operation.error);
+			msg.put("operation", Operation.ERROR);
 			msg.put("error", e.getMessage());
 			out.println(msg.toStr());
 			msg = null;
@@ -162,23 +162,33 @@ class MarketClient extends Thread {
 
 	private Message procGreeting(Message msg) {
 		Message resp = new Message();
-		String greeting = "";
 		
-		System.out.println(msg.toXML());
-		
-		greeting += "Welcome " + msg.asString("brokerId") + "! ";
-		greeting += "I'm Market v 1.0. ";
-		greeting += "Messages Supported: ";
-		greeting += "1 - Buy; ";
-		greeting += "2 - Sell; ";
-		greeting += "3 - Response; ";
-		greeting += "4 - Info; ";
-		greeting += "5 - Greeting; ";
-		greeting += "6 - Error;";
-		
-		resp.putAll(msg);
-		resp.put("operation", Operation.greeting);
-		resp.put("greet", greeting);
+		try {
+			String greeting = "";
+			
+			msg.ckeckGreeting();
+			
+			System.out.println(msg.toXML());
+			
+			greeting += "Welcome " + msg.asString("clientId") + "! ";
+			greeting += "I'm Market v 2.0. ";
+			greeting += "Messages Supported: ";
+			for (String name : Operation.names) {
+				greeting += name + ", ";
+			}
+			greeting = greeting.substring(0, greeting.length() - 2) + ".";
+			
+			resp.put("clientId", msg.get("clientId"));
+			resp.put("operation", Operation.GREETING);
+			resp.put("greet", greeting);
+		}
+		catch (InvalidMessage e) {
+			System.err.println(e.getMessage());
+			
+			resp.put("clientId", msg.get("clientId"));
+			resp.put("operation", Operation.ERROR);
+			resp.put("info", e.getMessage());
+		}
 		
 		return resp;
 	}
@@ -187,15 +197,17 @@ class MarketClient extends Thread {
 		Message resp = new Message();
 		
 		resp.put("clientId", msg.asString("clientId"));
-		resp.put("brokerId", msg.asString("brokerId"));
 		
 		try {
-			msg.validateInfo();
-			resp.put("operation", Operation.info);
+			msg.ckeckInfoRequest();
+			
+			resp.put("clientId", msg.get("clientId"));
+			resp.put("operation", Operation.INFO_RESPONSE);
 			resp.put("info", Book.getMarketInfo());
 		}
-		catch (Exception e) {
-			resp.put("operation", Operation.error);
+		catch (InvalidMessage e) {
+			resp.put("clientId", msg.get("clientId"));
+			resp.put("operation", Operation.ERROR);
 			resp.put("info", e.getMessage());
 		}
 		
@@ -205,8 +217,7 @@ class MarketClient extends Thread {
 	private Message procOperNotFound(Message msg) {
 		Message resp = new Message();
 		resp.put("clientId", msg.asString("clientId"));
-		resp.put("brokerId", msg.asString("brokerId"));
-		resp.put("operation", Operation.error);
+		resp.put("operation", Operation.ERROR);
 		resp.put("error", "Operation '" + msg.asInt("operation")
 				+ "' was not supported");
 		
@@ -217,10 +228,9 @@ class MarketClient extends Thread {
 		Message resp = new Message();
 		
 		resp.put("clientId", msg.asString("clientId"));
-		resp.put("brokerId", msg.asString("brokerId"));
 		
 		try {
-			msg.validateSell();
+			msg.checkSell();
 			
 			String symbol	= msg.asString("symbol");
 			double quota	= msg.asDouble("quota");
@@ -229,7 +239,7 @@ class MarketClient extends Thread {
 			Book book = Book.instance();
 			synchronized (book) {
 				if (book.containsKey(symbol)) {
-					resp.put("operation", Operation.response);
+					resp.put("operation", Operation.ACCEPT);
 					
 					Share share = book.get(symbol);
 					
@@ -247,14 +257,14 @@ class MarketClient extends Thread {
 					}
 				}
 				else {
-					resp.put("operation", Operation.error);
+					resp.put("operation", Operation.ERROR);
 					resp.put("error", "Symbol '" + symbol
 							+ "' isn't avaliable");
 				}
 			}
 		}
 		catch (Exception e) {
-			resp.put("operation", Operation.error);
+			resp.put("operation", Operation.ERROR);
 			resp.put("info", e.getMessage());
 		}
 		
@@ -265,10 +275,9 @@ class MarketClient extends Thread {
 		Message resp = new Message();
 		
 		resp.put("clientId", msg.asString("clientId"));
-		resp.put("brokerId", msg.asString("brokerId"));
 		
 		try {
-			msg.validateBuy();
+			msg.checkBuy();
 			
 			String symbol	= msg.asString("symbol");
 			double value	= msg.asDouble("value");
@@ -277,7 +286,7 @@ class MarketClient extends Thread {
 			Book book = Book.instance();
 			synchronized (book) {
 				if (Book.isAvaliable(symbol)) {
-					resp.put("operation", Operation.response);
+					resp.put("operation", Operation.ACCEPT);
 					
 					Share share = book.get(symbol);
 					
@@ -298,13 +307,13 @@ class MarketClient extends Thread {
 					}
 				}
 				else {
-					resp.put("operation", Operation.error);
+					resp.put("operation", Operation.ERROR);
 					resp.put("error", "Symbol '" + symbol + "' isn't avaliable");
 				}
 			}
 		}
 		catch (Exception e) {
-			resp.put("operation", Operation.error);
+			resp.put("operation", Operation.ERROR);
 			resp.put("info", e.getMessage());
 		}
 		

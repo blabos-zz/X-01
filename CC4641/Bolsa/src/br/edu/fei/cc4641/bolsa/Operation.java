@@ -1,21 +1,32 @@
 package br.edu.fei.cc4641.bolsa;
 
 abstract public class Operation {
-	public static final int message		= 0;
-	public static final int buy			= 1;
-	public static final int sell		= 2;
-	public static final int response	= 3;
-	public static final int info		= 4;
-	public static final int greeting	= 5;
-	public static final int error		= 6;
+	public static final int ERROR			= 0;
+	public static final int BUY				= 1;
+	public static final int SELL			= 2;
+	public static final int ACCEPT			= 3;
+	public static final int REJECT			= 4;
+	public static final int INFO_REQUEST	= 5;
+	public static final int INFO_RESPONSE	= 6;
+	public static final int GREETING		= 7;
 	
-	public static final String name[] = {
-		"Message",
+	public static final String names[] = {
+		"Error",
 		"BuyOrder",
 		"SellOrder",
-		"Response",
-		"MarketInfo",
+		"Accept",
+		"Reject",
+		"MarketInfoRequest",
+		"MarketInfoResponse",
 		"Greeting",
-		"Error",
 	};
+	
+	public static String asString(int operation) {
+		String ret = "Error";
+		
+		try { ret = names[operation]; }
+		catch (IndexOutOfBoundsException e) {}
+		
+		return ret;
+	}
 }
