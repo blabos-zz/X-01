@@ -33,21 +33,17 @@ public class Client {
 			prompt();
 			msg.put("clientId", stdin.readLine());
 			
-			stdout.println("brokerId:");
-			prompt();
-			msg.put("brokerId", stdin.readLine());
-			
 			stdout.println("Operation:");
-			stdout.println(Operation.buy		+ " - Buy");
-			stdout.println(Operation.sell 		+ " - Sell");
-			stdout.println(Operation.info 		+ " - Info");
-			stdout.println(Operation.greeting 	+ " - Greeting");
+			stdout.println(Operation.BUY			+ " - Buy");
+			stdout.println(Operation.SELL 			+ " - Sell");
+			stdout.println(Operation.INFO_REQUEST 	+ " - Info");
+			stdout.println(Operation.GREETING 		+ " - Greeting");
 			
 			prompt();
 			int oper = Integer.parseInt(stdin.readLine());
 			msg.put("operation", oper);
 			
-			if (oper < Operation.info) {
+			if (oper == Operation.BUY || oper == Operation.SELL) {
 				stdout.println("Symbol:");
 				prompt();
 				msg.put("symbol", stdin.readLine());
@@ -56,16 +52,19 @@ public class Client {
 				prompt();
 				msg.put("limit", Double.parseDouble(stdin.readLine()));
 				
-				if (oper == Operation.buy) {
+				if (oper == Operation.BUY) {
 					stdout.println("Value:");
 					prompt();
 					msg.put("value", Double.parseDouble(stdin.readLine()));
 				}
-				else if (oper == Operation.sell) {
+				else if (oper == Operation.SELL) {
 					stdout.println("Quotas:");
 					prompt();
-					msg.put("quota", Double.parseDouble(stdin.readLine()));
+					msg.put("quotas", Double.parseDouble(stdin.readLine()));
 				}
+			}
+			else if (oper == Operation.GREETING) {
+				msg.put("greet", "Hello Market!");
 			}
 		}
 		catch (Exception e) {
@@ -85,8 +84,11 @@ public class Client {
 		try {
 			cmd = Integer.parseInt(stdin.readLine());
 		}
+		catch (NumberFormatException e) {
+			System.out.println("EOF");
+		}
 		catch (Exception e) {
-			stderr.println("EOF");
+			cmd = NULL;
 		}
 		
 		return cmd;
@@ -101,7 +103,7 @@ public class Client {
 		
 		while (cmd != EXIT) {
 			if (reconnect()) {
-				if ((cmd = command()) == EXIT) continue;
+				if ((cmd = command()) == EXIT || cmd == NULL) continue;
 				
 				msg = collect();
 				
@@ -189,10 +191,10 @@ public class Client {
 			
 			int oper = msg.asInt("operation");
 			
-			if (oper == Operation.info) {
+			if (oper == Operation.INFO_RESPONSE) {
 				showInfo(msg);
 			}
-			else if (oper == Operation.greeting) {
+			else if (oper == Operation.GREETING) {
 				showGreeting(msg);
 			}
 			else {

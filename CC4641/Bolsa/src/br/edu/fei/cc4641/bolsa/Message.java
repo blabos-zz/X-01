@@ -11,7 +11,7 @@ public class Message extends HashMap<String, String> {
 	protected String name;
 	
 	public Message() {
-		name = "Message";
+		setName();
 	}
 	
 	public Message(String data)
@@ -145,108 +145,219 @@ public class Message extends HashMap<String, String> {
 		
 		ret += "<" + name + ">\n";
 		for (String key : keySet()) {
-			if (get(key).isEmpty()) continue;
+			try {
+				if (get(key).isEmpty()) continue;
 			
-			ret += "    <" + key + ">" + get(key) + "</" + key + ">\n";
+				ret += "    <" + key + ">" + get(key) + "</" + key + ">\n";
+			}
+			catch (Exception e) {
+				ret += "<error>Parse Error</error>";
+				break;
+			}
 		}
 		ret += "</" + name + ">\n";
 		
 		return ret;
 	}
 	
-	
-	/**
-	 * Validates message header.
-	 * @throws MissingRequiredField When missing a required field
-	 */
-	public void validateHeader() throws MissingRequiredField {
+	public void checkHeader() throws InvalidMessage {
 		if (get("clientId") == null) {
-			throw new MissingRequiredField(name, "clientId");
-		}
-		
-		if (get("brokerId") == null) {
-			throw new MissingRequiredField(name, "brokerId");
+			throw new InvalidMessage(
+				"Missing required field 'clientId' on message " + name);
 		}
 		
 		if (get("operation") == null) {
-			throw new MissingRequiredField(name, "operation");
+			throw new InvalidMessage(
+				"Missing required field 'operation' on message " + name);
 		}
 	}
 	
-	/**
-	 * Validates a Buy Order.
-	 * @throws MissingRequiredField When missing a requires field
-	 * @throws InvalidValue When a invalid value is found
-	 */
-	public void validateBuy() throws MissingRequiredField, InvalidValue {
-		validateHeader();
+	public void checkBuy() throws InvalidMessage {
+		checkHeader();
 		
-		if (asInt("operation") != Operation.buy) {
-			throw new InvalidValue(name, "operation", asString("operation"));
+		{
+			int oper = asInt("operation");
+			if (oper != Operation.BUY) {
+				throw new InvalidMessage(
+					"Invalid operation '" + Operation.asString(oper)
+					+ "' on message " + name);
+			}
 		}
 		
 		if (get("symbol") == null) {
-			throw new MissingRequiredField(name, "symbol");
+			throw new InvalidMessage(
+				"Missing required field 'symbol' on message " + name);
 		}
 		
 		if (get("value") == null) {
-			throw new MissingRequiredField(name, "value");
+			throw new InvalidMessage(
+				"Missing required field 'value' on message " + name);
 		}
 		
 		if (get("limit") == null) {
-			throw new MissingRequiredField(name, "limit");
+			throw new InvalidMessage(
+				"Missing required field 'limit' on message " + name);
 		}
 	}
 	
-	/**
-	 * Validates a Sell Order.
-	 * @throws MissingRequiredField When missing a requires field
-	 * @throws InvalidValue When a invalid value is found
-	 */
-	public void validateSell() throws MissingRequiredField, InvalidValue {
-		validateHeader();
+	public void checkSell() throws InvalidMessage {
+		checkHeader();
 		
-		if (asInt("operation") != Operation.sell) {
-			throw new InvalidValue(name, "operation", asString("operation"));
+		{
+			int oper = asInt("operation");
+			if (oper != Operation.SELL) {
+				throw new InvalidMessage(
+					"Invalid operation '" + Operation.asString(oper)
+					+ "' on message " + name);
+			}
 		}
 		
 		if (get("symbol") == null) {
-			throw new MissingRequiredField(name, "symbol");
+			throw new InvalidMessage(
+				"Missing required field 'symbol' on message " + name);
 		}
 		
-		if (get("quota") == null) {
-			throw new MissingRequiredField(name, "quota");
+		if (get("quotas") == null) {
+			throw new InvalidMessage(
+				"Missing required field 'quotas' on message " + name);
 		}
 		
 		if (get("limit") == null) {
-			throw new MissingRequiredField(name, "limit");
+			throw new InvalidMessage(
+				"Missing required field 'limit' on message " + name);
 		}
 	}
 	
-	/**
-	 * Validates a Market Info Order.
-	 * @throws MissingRequiredField When missing a requires field
-	 * @throws InvalidValue When a invalid value is found
-	 */
-	public void validateInfo() throws InvalidValue, MissingRequiredField {
-		validateHeader();
+	public void checkAccept() throws InvalidMessage {
+		checkHeader();
 		
-		if (asInt("operation") != Operation.info) {
-			throw new InvalidValue(name, "operation", asString("operation"));
+		{
+			int oper = asInt("operation");
+			if (oper != Operation.ACCEPT) {
+				throw new InvalidMessage(
+					"Invalid operation '" + Operation.asString(oper)
+					+ "' on message " + name);
+			}
+		}
+		
+		if (get("symbol") == null) {
+			throw new InvalidMessage(
+				"Missing required field 'symbol' on message " + name);
+		}
+		
+		if (get("value") == null) {
+			throw new InvalidMessage(
+				"Missing required field 'value' on message " + name);
+		}
+		
+		if (get("quotas") == null) {
+			throw new InvalidMessage(
+				"Missing required field 'quotas' on message " + name);
+		}
+		
+		if (get("limit") == null) {
+			throw new InvalidMessage(
+				"Missing required field 'limit' on message " + name);
 		}
 	}
 	
-	/**
-	 * Automatically sets message name using operation number.
-	 * @throws InvalidValue When a invalid operation is found
-	 */
-	private void setName() throws InvalidValue {
+	public void checkReject() throws InvalidMessage {
+		checkHeader();
+		
+		{
+			int oper = asInt("operation");
+			if (oper != Operation.REJECT) {
+				throw new InvalidMessage(
+					"Invalid operation '" + Operation.asString(oper)
+					+ "' on message " + name);
+			}
+		}
+		
+		if (get("symbol") == null) {
+			throw new InvalidMessage(
+				"Missing required field 'symbol' on message " + name);
+		}
+		
+		if (get("reason") == null) {
+			throw new InvalidMessage(
+				"Missing required field 'reason' on message " + name);
+		}
+	}
+	
+	public void ckeckInfoRequest() throws InvalidMessage {
+		checkHeader();
+		
+		{
+			int oper = asInt("operation");
+			if (oper != Operation.INFO_REQUEST) {
+				throw new InvalidMessage(
+					"Invalid operation '" + Operation.asString(oper)
+					+ "' on message " + name);
+			}
+		}
+	}
+	
+	public void ckeckInfoResponse() throws InvalidMessage {
+		checkHeader();
+		
+		{
+			int oper = asInt("operation");
+			if (oper != Operation.INFO_RESPONSE) {
+				throw new InvalidMessage(
+					"Invalid operation '" + Operation.asString(oper)
+					+ "' on message " + name);
+			}
+		}
+		
+		if (get("info") == null) {
+			throw new InvalidMessage(
+				"Missing required field 'info' on message " + name);
+		}
+	}
+	
+	public void ckeckGreeting() throws InvalidMessage {
+		checkHeader();
+		
+		{
+			int oper = asInt("operation");
+			if (oper != Operation.GREETING) {
+				throw new InvalidMessage(
+					"Invalid operation '" + Operation.asString(oper)
+					+ "' on message " + name);
+			}
+		}
+		
+		if (get("greet") == null) {
+			throw new InvalidMessage(
+				"Missing required field 'greet' on message " + name);
+		}
+	}
+	
+	public void ckeckError() throws InvalidMessage {
+		checkHeader();
+		
+		{
+			int oper = asInt("operation");
+			if (oper != Operation.ERROR) {
+				throw new InvalidMessage(
+					"Invalid operation '" + Operation.asString(oper)
+					+ "' on message " + name);
+			}
+		}
+		
+		if (get("error") == null) {
+			throw new InvalidMessage(
+				"Missing required field 'error' on message " + name);
+		}
+	}
+	
+	private void setName() {
 		try {
-			name = Operation.name[asInt("operation")];
+			name = Operation.names[asInt("operation")];
 		}
 		catch (IndexOutOfBoundsException e) {
-			name = "Message";
-			throw new InvalidValue(name, "operation", asString("operation"));
+			put("operation", Operation.ERROR);
+			name = "Error";
 		}
 	}
 }

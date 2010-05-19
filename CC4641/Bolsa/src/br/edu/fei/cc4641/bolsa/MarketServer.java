@@ -2,7 +2,7 @@ package br.edu.fei.cc4641.bolsa;
 import java.net.*;
 import java.io.*;
 
-public class Server extends Thread {
+public class MarketServer extends Thread {
 	private int port			= 7070;
 	private ServerSocket server = null;
 	
@@ -10,7 +10,7 @@ public class Server extends Thread {
 	
 	private Console console		= null;
 	
-	public Server(int port) {
+	public MarketServer(int port) {
 		this.port		= ((port > 1023) && (port < 65536)) ? port: 7070;
 		this.console	= new Console(this);
 		start();
@@ -20,12 +20,14 @@ public class Server extends Thread {
 		return stop;
 	}
 	
-	public synchronized void stopMe() {
-		stop = true;
+	public void stopMe() {
+		synchronized (this) {
+			stop = true;
+		}
 		
 		try {
 			server.close();
-			sleep(3000);
+			sleep(100);
 		}
 		catch (Exception e) {}
 		
@@ -46,7 +48,7 @@ public class Server extends Thread {
 		while(!canStop()) {
 			try {
 				@SuppressWarnings("unused")
-				Client client = new Client(server.accept());
+				MarketClient client = new MarketClient(server.accept());
 				System.out.println("Processing new client");
 			} catch (IOException e) {
 				System.err.println(e.getMessage());
@@ -55,7 +57,7 @@ public class Server extends Thread {
 	}
 }
 
-class Client extends Thread {
+class MarketClient extends Thread {
 	private Socket client		= null;
 	private PrintWriter out 	= null;
 	private BufferedReader in	= null;
@@ -66,8 +68,10 @@ class Client extends Thread {
 		return stop;
 	}
 	
-	public synchronized void stopMe() {
-		stop = true;
+	public void stopMe() {
+		synchronized (this) {
+			stop = true;
+		}
 		
 		try {
 			sleep(3000);
@@ -78,7 +82,7 @@ class Client extends Thread {
 		if (isAlive()) interrupt();
 	}
 	
-	public Client(Socket client) {
+	public MarketClient(Socket client) {
 		this.client = client;
 		try {
 			out	= new PrintWriter(this.client.getOutputStream(), true);
@@ -108,16 +112,16 @@ class Client extends Thread {
 			System.out.println(msg.toXML());
 			
 			switch (msg.asInt("operation")) {
-				case Operation.buy:
+				case Operation.BUY:
 					res = procBuy(msg);
 					break;
-				case Operation.sell:
+				case Operation.SELL:
 					res = procSell(msg);
 					break;
-				case Operation.info:
+				case Operation.INFO_REQUEST:
 					res = procInfo(msg);
 					break;
-				case Operation.greeting:
+				case Operation.GREETING:
 					res = procGreeting(msg);
 					break;
 				default:
@@ -139,7 +143,7 @@ class Client extends Thread {
 			
 			msg = new Message(line);
 			
-			msg.validateHeader();
+			msg.checkHeader();
 		} catch (IOException e) {
 			System.out.println(e.getMessage()
 					+ ". Closing client connection");
@@ -147,7 +151,7 @@ class Client extends Thread {
 		catch (Exception e) {
 			System.out.println(e.getMessage());
 			msg = new Message();
-			msg.put("operation", Operation.error);
+			msg.put("operation", Operation.ERROR);
 			msg.put("error", e.getMessage());
 			out.println(msg.toStr());
 			msg = null;
@@ -158,23 +162,33 @@ class Client extends Thread {
 
 	private Message procGreeting(Message msg) {
 		Message resp = new Message();
-		String greeting = "";
 		
-		System.out.println(msg.toXML());
-		
-		greeting += "Welcome " + msg.asString("brokerId") + "! ";
-		greeting += "I'm Market v 1.0. ";
-		greeting += "Messages Supported: ";
-		greeting += "1 - Buy; ";
-		greeting += "2 - Sell; ";
-		greeting += "3 - Response; ";
-		greeting += "4 - Info; ";
-		greeting += "5 - Greeting; ";
-		greeting += "6 - Error;";
-		
-		resp.putAll(msg);
-		resp.put("operation", Operation.greeting);
-		resp.put("greet", greeting);
+		try {
+			String greeting = "";
+			
+			msg.ckeckGreeting();
+			
+			System.out.println(msg.toXML());
+			
+			greeting += "Welcome " + msg.asString("clientId") + "! ";
+			greeting += "I'm Market v 2.0. ";
+			greeting += "Messages Supported: ";
+			for (String name : Operation.names) {
+				greeting += name + ", ";
+			}
+			greeting = greeting.substring(0, greeting.length() - 2) + ".";
+			
+			resp.put("clientId", msg.get("clientId"));
+			resp.put("operation", Operation.GREETING);
+			resp.put("greet", greeting);
+		}
+		catch (InvalidMessage e) {
+			System.err.println(e.getMessage());
+			
+			resp.put("clientId", msg.get("clientId"));
+			resp.put("operation", Operation.ERROR);
+			resp.put("info", e.getMessage());
+		}
 		
 		return resp;
 	}
@@ -183,15 +197,17 @@ class Client extends Thread {
 		Message resp = new Message();
 		
 		resp.put("clientId", msg.asString("clientId"));
-		resp.put("brokerId", msg.asString("brokerId"));
 		
 		try {
-			msg.validateInfo();
-			resp.put("operation", Operation.info);
+			msg.ckeckInfoRequest();
+			
+			resp.put("clientId", msg.get("clientId"));
+			resp.put("operation", Operation.INFO_RESPONSE);
 			resp.put("info", Book.getMarketInfo());
 		}
-		catch (Exception e) {
-			resp.put("operation", Operation.error);
+		catch (InvalidMessage e) {
+			resp.put("clientId", msg.get("clientId"));
+			resp.put("operation", Operation.ERROR);
 			resp.put("info", e.getMessage());
 		}
 		
@@ -201,8 +217,7 @@ class Client extends Thread {
 	private Message procOperNotFound(Message msg) {
 		Message resp = new Message();
 		resp.put("clientId", msg.asString("clientId"));
-		resp.put("brokerId", msg.asString("brokerId"));
-		resp.put("operation", Operation.error);
+		resp.put("operation", Operation.ERROR);
 		resp.put("error", "Operation '" + msg.asInt("operation")
 				+ "' was not supported");
 		
@@ -213,10 +228,9 @@ class Client extends Thread {
 		Message resp = new Message();
 		
 		resp.put("clientId", msg.asString("clientId"));
-		resp.put("brokerId", msg.asString("brokerId"));
 		
 		try {
-			msg.validateSell();
+			msg.checkSell();
 			
 			String symbol	= msg.asString("symbol");
 			double quota	= msg.asDouble("quota");
@@ -225,7 +239,7 @@ class Client extends Thread {
 			Book book = Book.instance();
 			synchronized (book) {
 				if (book.containsKey(symbol)) {
-					resp.put("operation", Operation.response);
+					resp.put("operation", Operation.ACCEPT);
 					
 					Share share = book.get(symbol);
 					
@@ -243,14 +257,14 @@ class Client extends Thread {
 					}
 				}
 				else {
-					resp.put("operation", Operation.error);
+					resp.put("operation", Operation.ERROR);
 					resp.put("error", "Symbol '" + symbol
 							+ "' isn't avaliable");
 				}
 			}
 		}
 		catch (Exception e) {
-			resp.put("operation", Operation.error);
+			resp.put("operation", Operation.ERROR);
 			resp.put("info", e.getMessage());
 		}
 		
@@ -261,10 +275,9 @@ class Client extends Thread {
 		Message resp = new Message();
 		
 		resp.put("clientId", msg.asString("clientId"));
-		resp.put("brokerId", msg.asString("brokerId"));
 		
 		try {
-			msg.validateBuy();
+			msg.checkBuy();
 			
 			String symbol	= msg.asString("symbol");
 			double value	= msg.asDouble("value");
@@ -273,7 +286,7 @@ class Client extends Thread {
 			Book book = Book.instance();
 			synchronized (book) {
 				if (Book.isAvaliable(symbol)) {
-					resp.put("operation", Operation.response);
+					resp.put("operation", Operation.ACCEPT);
 					
 					Share share = book.get(symbol);
 					
@@ -294,13 +307,13 @@ class Client extends Thread {
 					}
 				}
 				else {
-					resp.put("operation", Operation.error);
+					resp.put("operation", Operation.ERROR);
 					resp.put("error", "Symbol '" + symbol + "' isn't avaliable");
 				}
 			}
 		}
 		catch (Exception e) {
-			resp.put("operation", Operation.error);
+			resp.put("operation", Operation.ERROR);
 			resp.put("info", e.getMessage());
 		}
 		
@@ -310,14 +323,14 @@ class Client extends Thread {
 
 
 class Console extends Thread {
-	private Server server			= null;
+	private MarketServer server			= null;
 	private boolean stop			= false;
 	
 	private BufferedReader stdin	= null;
     private PrintStream stdout		= null;
     private PrintStream stderr		= null;
 	
-	public Console(Server server) {
+	public Console(MarketServer server) {
 		this.server = server;
 	}
 	
@@ -331,16 +344,10 @@ class Console extends Thread {
 		return stop;
 	}
 	
-	public synchronized void stopMe() {
-		stop = true;
-		
-		try {
-			sleep(3000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+	public void stopMe() {
+		synchronized (this) {
+			stop = true;
 		}
-		
-		if (isAlive()) interrupt();
 	}
 	
 	public void run() {
