@@ -255,6 +255,8 @@ class MarketClient extends Thread {
 						resp.put("value", 0);
 						resp.put("total", 0);
 					}
+
+                                        resp.put("reqOper", Operation.SELL);
 				}
 				else {
 					resp.put("operation", Operation.ERROR);
@@ -305,6 +307,8 @@ class MarketClient extends Thread {
 						resp.put("quota", 0);
 						resp.put("total", 0);
 					}
+
+                                        resp.put("reqOper", Operation.BUY);
 				}
 				else {
 					resp.put("operation", Operation.ERROR);
