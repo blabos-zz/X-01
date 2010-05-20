@@ -1,7 +1,20 @@
 \chapter{Desenvolvimento Colaborativo}
 \section{Aplicando patches}
 \section{Modelos de Ciclo de Trabalho}
+
+Com o advento dos Sistemas de Controle de Versão, as equipes puderam estabelecer ciclos de trabalho mais bem definidos, utilizando-se das facilidades fornecidas por esses softwares.
+
+Embora isso tenha ajudado padronizar as formas de se trabalhar, essas metodologias ainda erm fortemente limitadas pelo que os SCV conseguiam fazer.
+
+Alguns do ciclos de trabalho tiveram maior destaque no mercado e forma perpetuando-se aolongo dos anos. Os mais conhecidos e uilizados são explicados brevemente logo abaixo.
+
+
 \subsection{Lock-Modify-Unlock}
+
+No modelo de desenvolvimento Lock-Modify-Unlock (Travar-Modificar-Liberar) o desenvolvedor toma posse do arquivo ou conjunto de arquivos travando-os, de forma nenhum outro membro do projeto possa modificá-los. Então ele realiza as edições que achar necessárias e aplica testes. Quando concluir as alterações ele então libera os arquivos para que outras pessoas possam aterá-los.
+
+A utilização dessa metodologia era muito comum no RCS e CVS, e também está  disponível no Subversion. Ela impede que mais de uma pessoa edite o mesmo arquivo simultanemamente. Se por um lado isso evita conflitos, por outro adiciona problemas pois se um desenvolvedor se esquece de liberar um arquivo anteriromente travado por ele, ou pior ainda, se esse desenvolvedor sair de férias, esses arquivos permanecerão indisponíveis até que ele retorne ou até que um administrador libere os arquivo manualnmente.
+
 \subsection{Copy-Modify-Merge}
 \subsection{Integration Manager}
 \subsection{Dictator and Lieutenants}
