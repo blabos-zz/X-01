@@ -28,7 +28,7 @@
 {%
 \if@openright\cleardoublepage\else\clearpage\fi%
 \setchaptertype{resumo}
-\pretextualchapter{\resumoname}%
+\pretextualchapter{\abstractname}%
 \begin{espacosimples}%
 \setlength{\parindent}{0cm}
 }%
@@ -59,3 +59,33 @@
 % altera os tíulos de referência e anexo para ficarem em maiúsculo
 \renewcommand{\ABNTbibliographyname}{REFER\^ENCIAS}
 \renewcommand{\annexname}{ANEXOS}
+
+
+% Altera título do capítulo para negrito sem itálico 12pt
+\renewcommand{\ABNTCHAPTERfont}{\normalfont\bfseries}
+\renewcommand{\ABNTtocchapterfont}{\ABNTchapterfont\upshape}
+\renewcommand{\ABNTchaptersize}{\large}
+
+% MUDA OS CAPÍTULOS PARA FICAREM EM MAIÚSCULO NO SUMÁRIO
+\let \oldchap=\chapter{}
+\renewcommand*{\chapter}{%
+\secdef{\Chap}{\ChapS}%
+}
+\newcommand\ChapS[1]{\oldchap*{\MakeUppercase{#1}}}
+\newcommand\Chap[2][]{\oldchap[\MakeUppercase{#1}]{\MakeUppercase{#2}}}
+
+
+% muda as seções para ficarem em negrito no sumário
+\let \oldsect=\section{}
+\renewcommand*{\section}{%
+\secdef{\Sect}{\SectS}%
+}
+\newcommand\SectS[1]{\oldsect*{\bfseries{#1}}}
+\newcommand\Sect[2][]{\oldsect[\bfseries{#1}]{#2}}
+
+% Altera título das seções para 12pt
+\renewcommand{\ABNTsectionfontsize}{\large}
+\renewcommand{\ABNTsectionfont}{\bfseries}
+
+% Altera título das subseções para 12pt
+\renewcommand{\ABNTsubsectionfont}{\large}

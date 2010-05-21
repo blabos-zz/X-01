@@ -10,8 +10,8 @@ ao longo dos anos.
 No século XIX teares programáveis e tocadores automáticos de piano já implementavam o que
 hoje é conhecido por Linguagem de Domínio Específico (DSN - Domain Specifc Language).
 
-No início do século XX  o formalismo dos trabalhos de Alonzo Church (Cálculo Lambda) \cite{Church}e
-de Alan Turing (Máquina de Turing) \cite{Turing} foreneceram as bases matemáticas necessárias para se
+No início do século XX  o formalismo dos trabalhos de Alonzo Church -- Cálculo Lambda -- \cite{Church} e
+de Alan Turing -- Máquina de Turing -- \cite{Turing} foreneceram as bases matemáticas necessárias para se
 expressar Algoritmos.
  
 Entretanto, as primeiras linguagens de programação utilizadas por computadores digitais
@@ -49,7 +49,8 @@ posteriormente patch.
 O trabalho de encontrar as diferenças entre os arquivos foi simplificado, mas
 a tarefa de aplicar as correções ainda era realizada manualmente.
 
-Para resolver esse problema, em maio de 1985 Larry Wall criou o programa patch \cite{Wall}.
+Para resolver esse problema, em maio de 1985 Larry Wall criou o programa patch \cite{Wall}
+\footnote{Larry Wall escreveu a versão original do \emph{patch}. Paul Eggert removeu os limites arbitrários do patch; adicionou suporte a arquivos binários, datação e deleção dos arquivos; e deixou-o em conformidade com o padrão POSIX. Outros contribuidores incluem Wayne  Davison, que adicionaou suporte ao formato unidiff, e David MacKenzie, que adicionaou configurações e suporte a backup. Andreas Grünbacher adicionou suporte a mesclagem (merging).\cite{Man}}.
 Esse programa pega um arquivo no formato gerado pelo diff e aplica no arquivo
 completo de fontes, automatizando a tarefa de correção. Logo esse processo
 passou a ser conhecido como patching, onde criar um patch é gerar um arquivo
@@ -167,5 +168,7 @@ a escolha oposta ao que o CVS fez.
 \item Altíssima performance
 
 \end{enumerate}
+
+Com essas premissas em mente Linus começou o desenvolvimento do Git e em menos de duas semanas já tinha implementado várias funcionlaidades. Menos de dois meses depois, o kernel 2.6.12 já era lançado tendo seu código gerenciado pelo próprio Git \cite{Chacon}.
 
 

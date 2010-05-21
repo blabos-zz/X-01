@@ -1,20 +1,132 @@
 \chapter{Desenvolvimento Colaborativo}
+
+Na época em que o software se resumia ao conjunto de posições de plugues e cabos, a expressão ``trabalho Colaborativo'' aplicava-se ao trabalho conjunto de engenheiros mecânicos, eletricistas, técnicos e pesquisadores. Na maioria dos casos a programação primitiva era realizada por pouquíssimas pessoas extremamente especializadas e palavras como ``conflitos'' não se aplicavam.
+
+Só com o aparecimento das linguagens de alto nível e do uso comercial dos computadores é que começou a haver uma preocupação com a profissionalização da tarefa de programá-los, de forma a possibilitar a produção de software em larga escala.
+
+Mas conforme a quantidade de código ia aumentando, a quantidade pessoas envolvidas no desenvolvimento de uma aplicação, o número de erros de programação e consequentemente de correções e atualizações também crescia.
+
+A análise das falhas e suas correções eram tarefas manuais, demoradas e tediosas, muito propensas a erros, pois uma correção deveria ser propagada até a matriz de fontes de onde eram gerados os binários que eram posteriormente distribuídos.
+
+As primeiras ferramentas para automatizar as tarefas gerenciamento e manutenção de fontes foram o diff e o patch. Alguns anos depois vieram os Sistemas de Controle de Versão centralizados e posteriormente os Sistemas de Controle de Versão distribuídos.
+
+
 \section{Aplicando patches}
-\section{Modelos de Ciclo de Trabalho}
 
-Com o advento dos Sistemas de Controle de Versão, as equipes puderam estabelecer ciclos de trabalho mais bem definidos, utilizando-se das facilidades fornecidas por esses softwares.
+Como visto anteriormente o diff foi criado em 1974 e ajudou a estabelecer diferenças textuais entre arquivos. Em 1985, Larry Wall cia seu complemento, o patch, e desde então a vida dos desenvolvedores foi bastante facilitada.
 
-Embora isso tenha ajudado padronizar as formas de se trabalhar, essas metodologias ainda erm fortemente limitadas pelo que os SCV conseguiam fazer.
+Para o caso dos softwares cuja distribuição do código fonte era aberta, quando alguém encontrava um problema bastava realizar as correções diretamente no código fonte e recompilá-lo. Para que essas correções chegassem aos desenvolvedores da aplicação, o programador que fez as correções criava com o programa diff um arquivo contendo as diferenças entre os fontes originais e os fontes corrigidos e enviava aos desenvolvedores originais. Estes aplicavam então as alterações automaticamente utilizando o programa patch. Por esse motivo o arquivo com as diferenças passou a ser conhecido também como ``patch'' da aplicação.
 
-Alguns do ciclos de trabalho tiveram maior destaque no mercado e forma perpetuando-se aolongo dos anos. Os mais conhecidos e uilizados são explicados brevemente logo abaixo.
+Esse processo poupava um tempo precioso dos desenvolvedores, que ao invés de gastar semanas analisando toda uma imensidão de fontes, podiam se concentrar apenas nos pontos incongruentes.
+
+Dessa forma o ciclo normal para uma correção de software consistia em:
+
+\begin{enumerate}
+\item Identificar o problema
+\item Identificar nos fontes o trecho de código que gerava o problema
+\item Corrigir a falha
+\item Criar um patch com as correções utilizando o programa diff
+\item Enviar o patch ao mantenedor do software
+\item O mantenedor aplicar ou não o patch utilizando o progrma homônimo.
+\end{enumerate}
+
+O grande problema agora não era mais localizar e corrigir o problema, mas sim decidir quando aplicar ou não um determinado patch, pois embora seja simples aplicá-lo, reverter um patch problemático é bem mais complicado.
+
+Outro problema difícil de resolver era como manter o rastreamento da genealogia do software. Com tantos patches, responder quem aplicou qual patch e quando, nem sempre era possível.
+
+Esses e outros problemas puderam ser resolvidos com a utilização dos Sistemas de Controle de Versão, que além de facilitar ainda mais a aplicação de patches, auxiliam nas tarefas de rastreamento, bifurcação e mesclagem de código.
+
+Conforme essas ferramentas foram evoluindo, outros ciclos de trabalho foram sendo adotados, de forma a simplificar o processo de desenvolvimento de software como veremos adiante.
+
+\section{Modelos de Ciclo de Trabalho Centralizados}
+
+Com o advento dos Sistemas de Controle de Versão, as equipes puderam estabelecer ciclos de trabalho mais robustos, utilizando-se das facilidades fornecidas por esses softwares.
+
+Esses ciclos de trabalho são nada mais que convenções a respeito da sequência de passos necessários para manter o bom andamento das tarefas de desenvolvimento.
+
+Embora isso tenha ajudado padronizar as formas de se trabalhar, essas metodologias ainda eram fortemente limitadas pelo que os SCV conseguiam fazer.
+
+Alguns do ciclos de trabalho tiveram maior destaque no mercado e foram perpetuando-se aolongo dos anos. Os mais conhecidos e uilizados serão explicados brevemente.
 
 
 \subsection{Lock-Modify-Unlock}
 
 No modelo de desenvolvimento Lock-Modify-Unlock (Travar-Modificar-Liberar) o desenvolvedor toma posse do arquivo ou conjunto de arquivos travando-os, de forma nenhum outro membro do projeto possa modificá-los. Então ele realiza as edições que achar necessárias e aplica testes. Quando concluir as alterações ele então libera os arquivos para que outras pessoas possam aterá-los.
 
-A utilização dessa metodologia era muito comum no RCS e CVS, e também está  disponível no Subversion. Ela impede que mais de uma pessoa edite o mesmo arquivo simultanemamente. Se por um lado isso evita conflitos, por outro adiciona problemas pois se um desenvolvedor se esquece de liberar um arquivo anteriromente travado por ele, ou pior ainda, se esse desenvolvedor sair de férias, esses arquivos permanecerão indisponíveis até que ele retorne ou até que um administrador libere os arquivo manualnmente.
+A utilização dessa metodologia foi muito comum com o RCS e o CVS, e também está  disponível no Subversion. Ela impede que mais de uma pessoa edite o mesmo arquivo simultaneamente. O ciclo padrão de desenvolvimento consiste basicamente em:
+
+\begin{enumerate}
+\item Travar o arquivo no servidor
+\item Realizar as alterações e testes que forem necessários
+\item Destravar o arquivo no servidor.
+\end{enumerate}
+
+Esse tipo de ciclo de trabalho mostra-se adequado em projetos onde os arquivos são razoavelmente independentes uns dos outros, podendo ser alterados separadamente sem maiores prejuízos aos restantes, pois, quanto maior a quantidade de arquivos travados, maior as chances de outro desenvolvedor precisar esperar enquanto as atualizações não ficam prontas.
+
+Se por um lado isso evita conflitos, por outro adiciona problemas pois se um desenvolvedor se esquecer de liberar um arquivo anteriromente travado por ele, ou pior ainda, se esse desenvolvedor sair de férias, esses arquivos permanecerão indisponíveis até que ele retorne ou até que um administrador libere os arquivos manualmente \cite{Sussman}.
 
 \subsection{Copy-Modify-Merge}
+
+O modelo Copy-Modify-Merge (Copiar-Modificar-Mesclar) é o modelo de ciclo de desenvolvimento padrão quando se trabalha com o Subversion. Com ele cada desenvolvedor extrai do servidor uma cópia dos arquivos com os quais pretende trabalhar. Em seguida ele realiza as alterações que julgar necessárias e as publica no servidor, mesclando seu trabalho sobre sua cópia ao conteúdo do arquivo remoto.
+
+Quando algum desenvolvedor fizer uma cópia dos dados no servidor, as alterações criadas por outros desenvolvedores são automaticamente propagadas.
+
+Problemas começam a surgir quando mais de um desenvolvedor precisa alterar o mesmo arquivo simultaneamente, principalmente em trechos muito próximos entre si. Na maioria das vezes o próprio Sistema de Controle de Versão cuida para que se possam fazer mesclagens automáticas. Quando isso não é possível, temos o que chamanos de conflitos. Estes devem ser resolvidos manualmente pelos desenvolvedores.
+
+O ciclo normal de desenvolvimento é portanto:
+
+\begin{enumerate}
+\item Extrair uma cópia dos arquivos no servidor
+\item Realizar as alterações e testes necessários
+\item Verificar e resolver conflitos, se existirem
+\item Publicar as alterações no servidor
+\end{enumerate}
+
+\section{Modelos de Ciclo de Trabalho Descentralizados}
+
+Embora a evolução dos Sistemas de Controle de Versão tenham propiciado até este ponto a solução de vários problemas, basta que o servidor fique indisponível, por exemplo, para que todo o ciclo de desenvolvimento fique comprometido.
+
+Projetos maiores e com equipes localizadas geografiamente distantes necessitam de algumas outras funcionalidades. A principal delas é que o ciclo de desenvolvimento seja descentralizado.
+
+Alguns dos Sistemas de Controle de Versão que permitem nativamente esse tipo de ciclo de trabalho são o Git, o Mercurial e o Bazaar.
+
+
 \subsection{Integration Manager}
+
+Neste cenário, cada desenvolvedor possui uma cópia do repositório público, onde ele realiza suas alterações. Quando se fizer necessário, o desenvolvedor avisa a um Gerente de Integração que há código disponível em sua área pública. O gerente então avalia e absorve absorve essas alterações e publica-as no repositório principal da empresa. Cada desenvolvedor é então responsável por sincronizar seu repositório particular com o repositório partcular da empresa e repete-se o ciclo\cite{Chacon}.
+
+O fluxo de trabalho é parecido com:
+
+\begin{enumerate}
+\item O desenvolverdor sincroniza seu repositório particular com o da empresa
+\item Realiza as alterações e testes necessários
+\item Comunica ao Gerente de Integração que há código disponível
+\item O Gerente avalia e atualiza ou não o repositório central da empresa
+\end{enumerate}
+
+
 \subsection{Dictator and Lieutenants}
+
+Este ciclo de desenvolvimento é bem parecido com o anterior e é o modelo adotado no desenvolvimento do kernel do Linux atualmente.
+
+Nele o ``ditador'' Linus Torvalds é responsável por publicar a árvore oficial de fontes do kernel, que é autoritativa em relação às demais. Ele aceita atualizações apenas de alguns ``tenentes confiáveis'' \cite{Sullivan}, que por sua vez são responsáveis por algum dos subsistemas do kernel.
+
+Esses ``tenentes'' podem possuir um ciclo de trabalho completamente diferente do ``ditador'', ou ainda podem ser ditadores de outros tenentes, adicionando camadas de hierarquia completamente heterogêneas. Dessa forma, cada equipe pode trabalhar internamente seguindo alguns procedimentos, enquanto mantém uma interface bem definida com os outros grupos.
+
+Aproveitando-se de técnicas mais eficientes para ramificação e mesclagem de código, o ciclo usual de trabalho nesse modelo de desenvolvimento é:
+
+\begin{enumerate}
+\item Atualizar seu repositório com as atualizações publicadas pelo ditador
+\item Realizar as alteraçẽos e testes necessários
+\item Submeter essas alterações à avaliação do seu superior imediato na hieraquia, que pode incluí-las no no código oficial um nível acima, ou rejeitá-las.
+\end{enumerate}
+
+\section{Colaboração em Paralelo}
+
+Os Sistemas de Controle de Versão e modelos de desenvolvimento centralizados mostram-se mais adequados a pequenos projetos ou a situações onde mesmo uma equipe grande localiza-se geograficamente próxima, pois depende de uma boa comunicação e da disponibilidade constante do servidor central.
+
+Como vimos, basta que o servidor fique indisponível nesses casos, que os Sistemas de Controle de Versão centralizados mostram-se indeficazes, muitas vezes até atrapalhando o ciclo normal de desenvolvimento.
+
+Já os Sistemas de Controle de Versão e ciclos de trabalho descentralizados, permitem que células independentes realizem seu trablaho em paralelo, de forma bastante flexível, mesmo sob condições adversas de comunicação.
+
+No desenvolvimento deste trablaho mostraremos alguns estudos de caso que demonstram como essas ferramentas originalmente desenvolvidas somente para controle e rastreamento de versões podem ser aplicadas para otimizar a performance de equipes em situações geográficas distintas.

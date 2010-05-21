@@ -1,0 +1,15 @@
+\BOOKMARK [0][-]{chapter.abstract.1}{Introdu\347\343o}{}
+\BOOKMARK [1][-]{section.abstract.1.1}{Objetivos}{chapter.abstract.1}
+\BOOKMARK [0][-]{chapter.abstract.2}{Hist\363rico}{}
+\BOOKMARK [1][-]{section.abstract.2.1}{A Aurora das Linguagens de Programa\347\343o Modernas}{chapter.abstract.2}
+\BOOKMARK [1][-]{section.abstract.2.2}{As ferramentas diff e patch}{chapter.abstract.2}
+\BOOKMARK [1][-]{section.abstract.2.3}{O Nascimento do Controle de Vers\365es}{chapter.abstract.2}
+\BOOKMARK [1][-]{section.abstract.2.4}{O Linux e o Controle Descentralizado de Vers\365es}{chapter.abstract.2}
+\BOOKMARK [0][-]{chapter.abstract.3}{Desenvolvimento Colaborativo}{}
+\BOOKMARK [1][-]{section.abstract.3.1}{Aplicando patches}{chapter.abstract.3}
+\BOOKMARK [1][-]{section.abstract.3.2}{Modelos de Ciclo de Trabalho}{chapter.abstract.3}
+\BOOKMARK [2][-]{subsection.abstract.3.2.1}{Lock-Modify-Unlock}{section.abstract.3.2}
+\BOOKMARK [2][-]{subsection.abstract.3.2.2}{Copy-Modify-Merge}{section.abstract.3.2}
+\BOOKMARK [2][-]{subsection.abstract.3.2.3}{Integration Manager}{section.abstract.3.2}
+\BOOKMARK [2][-]{subsection.abstract.3.2.4}{Dictator and Lieutenants}{section.abstract.3.2}
+\BOOKMARK [0][-]{subsection.abstract.3.2.4}{REFER\312NCIAS}{}
