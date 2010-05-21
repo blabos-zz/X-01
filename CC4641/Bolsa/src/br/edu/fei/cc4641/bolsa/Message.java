@@ -240,6 +240,20 @@ public class Message extends HashMap<String, String> {
 			}
 		}
 		
+		if (get("reqOper") == null) {
+			throw new InvalidMessage(
+				"Missing required field 'reqOper' on message " + name);
+		}
+		
+		{
+			int oper = asInt("reqOper");
+			if (oper != Operation.BUY || oper != Operation.SELL) {
+				throw new InvalidMessage(
+					"Invalid reqOper value '" + oper)
+					+ "' on message " + name);
+			}
+		}
+		
 		if (get("symbol") == null) {
 			throw new InvalidMessage(
 				"Missing required field 'symbol' on message " + name);
