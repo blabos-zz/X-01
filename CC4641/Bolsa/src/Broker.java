@@ -1,12 +1,7 @@
+import br.edu.fei.cc4641.bolsa.*;
 
 public class Broker {
-
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
+	    BrokerServer server = new BrokerServer(7071);
 	}
-
 }

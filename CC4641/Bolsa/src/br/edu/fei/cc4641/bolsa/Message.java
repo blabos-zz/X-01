@@ -249,7 +249,7 @@ public class Message extends HashMap<String, String> {
 			int oper = asInt("reqOper");
 			if (oper != Operation.BUY || oper != Operation.SELL) {
 				throw new InvalidMessage(
-					"Invalid reqOper value '" + oper)
+					"Invalid reqOper value '" + oper
 					+ "' on message " + name);
 			}
 		}
