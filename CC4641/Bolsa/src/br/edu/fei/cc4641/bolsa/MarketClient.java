@@ -193,12 +193,14 @@ public class MarketClient extends MarketThread {
                     }
                     else {
                         resp.put("operation",   Operation.REJECT);
+                        resp.put("reqOper",     Operation.SELL);
                         resp.put("reason",      "Limit '" + limit
                                                 + "' is too high");
                     }
                 }
                 else {
                     resp.put("operation",   Operation.REJECT);
+                    resp.put("reqOper",     Operation.SELL);
                     resp.put("reason",      "Symbol '" + symbol
                                             + "' isn't avaliable");
                 }
@@ -252,12 +254,14 @@ public class MarketClient extends MarketThread {
                     }
                     else {
                         resp.put("operation",   Operation.REJECT);
+                        resp.put("reqOper",     Operation.BUY);
                         resp.put("reason",      "Limit '" + limit
                                                 + "' is too low");
                     }
                 }
                 else {
                     resp.put("operation",   Operation.REJECT);
+                    resp.put("reqOper",     Operation.BUY);
                     resp.put("reason",      "Symbol '" + symbol
                                             + "' isn't avaliable");
                 }
