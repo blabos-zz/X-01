@@ -13,8 +13,7 @@ public class Client {
 
 
 class ClientAgent extends MarketThread {
-    private final int CMD_NULL      = -2;
-    private final int CMD_INIT      = -1;
+    private final int CMD_NULL      = -1;
     private final int CMD_EXIT      = 0;
     private final int CMD_SEND      = 1;
     private final int CMD_SHOW      = 2;
@@ -52,10 +51,11 @@ class ClientAgent extends MarketThread {
                 
                 switch (cmd) {
                     case CMD_SEND:
-                        sendNewOrder();
-                        response = receiveResponse();
-                        showResponse(response);
-                        updateAccount(response);
+                        if(sendNewOrder()) {
+                            response = receiveResponse();
+                            showResponse(response);
+                            updateAccount(response);
+                        }
                         break;
                         
                     case CMD_SHOW:
@@ -179,15 +179,16 @@ class ClientAgent extends MarketThread {
         return msg;
     }
 
-    private void sendNewOrder() {
+    private boolean sendNewOrder() {
+        boolean ret = false;
         Message msg = collectFields();
         
         if (msg != null) {
             netOut.println(msg.toStr());
+            ret = true;
         }
-        else {
-            stderr.println("Invalid message generated. Not sending");
-        }
+        
+        return ret;
     }
 
     private Message collectFields() {
@@ -218,7 +219,8 @@ class ClientAgent extends MarketThread {
                 
                 prompt();
                 
-                msg.put("limit", Double.parseDouble(stdin.readLine()));
+                msg.put("limit",
+                        Math.abs(Double.parseDouble(stdin.readLine())));
                 
                 
                 if (oper == Operation.BUY) {
@@ -226,18 +228,34 @@ class ClientAgent extends MarketThread {
                     
                     prompt();
                     
-                    msg.put("value", Double.parseDouble(stdin.readLine()));
+                    double value = Double.parseDouble(stdin.readLine());
+                    double money = Account.instance().getBalance();
+                    if (value <= money) {
+                        msg.put("value", value);
+                    }
+                    else {
+                        stderr.printf("Insufficient money: %.2f\n", money);
+                        msg = null;
+                    }
+                    
                 }
                 else if (oper == Operation.SELL) {
                     stdout.println("\nQuotas:");
                     
                     prompt();
                     
-                    msg.put("quotas", Double.parseDouble(stdin.readLine()));
+                    msg.put("quotas",
+                            Math.abs(Double.parseDouble(stdin.readLine())));
                 }
             }
             else if (oper == Operation.GREETING) {
                 msg.put("greet", "Hello Market!");
+            }
+            else if (oper == Operation.INFO_REQUEST) {
+                // Do nothing. All fields are already collected
+            }
+            else {
+                msg = null;
             }
         }
         catch (Exception e) {
