@@ -84,7 +84,7 @@ class Share {
         return symbol;
     }
     
-    private void setUnitValue(double unitValue) {
+    public void setUnitValue(double unitValue) {
         this.unitValue = unitValue;
     }
     

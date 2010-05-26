@@ -12,41 +12,30 @@ public class BrokerMarketWorker extends MarketThread {
     private static PrintWriter netOut           = null;
     private LinkedList<Message> messageQueue    = null;
     
+    
     public BrokerMarketWorker(BrokerServer server) {
-        stderr.println("BrokerMarketWorker.BrokerMarketWorker");
-        
         this.brokerServer = server;
         this.messageQueue = new LinkedList<Message>();
-        
-        start();
     }
     
     private synchronized Message dequeue() {
-        stderr.println("BrokerMarketWorker.dequeue");
-        
         Message msg = null;
         
         try {
-            msg = (Message)messageQueue.removeFirst();
+            msg = messageQueue.removeFirst();
         }
         catch (Exception e) {
-            e.printStackTrace();
+            stderr.println(e.getMessage());
         }
         
         return msg;
     }
     
     public synchronized void enqueue(Message msg) {
-        stderr.println("BrokerMarketWorker.enqueue: "
-                + msg.toStr());
-        
         messageQueue.addLast(msg);
-        stderr.println("BrokerMarketWorker.enqueue.end");
     }
     
-    private boolean reconnect() {
-        stderr.println("BrokerMarketWorker.reconnect");
-        
+    private boolean connectionOk() {
         int retries = 0;
         
         if (marketSocket != null && marketSocket.isConnected()) {
@@ -55,10 +44,6 @@ public class BrokerMarketWorker extends MarketThread {
         
         while (retries < MAX_RETRIES) {
             try {
-                marketSocket    = null;
-                netOut          = null;
-                netIn           = null;
-
                 marketSocket
                     = new Socket(brokerServer.marketHost(),
                             brokerServer.marketPort());
@@ -73,7 +58,7 @@ public class BrokerMarketWorker extends MarketThread {
                 return true;
             }
             catch (Exception e) {
-                e.printStackTrace();
+                stderr.println(e.getMessage());
                 retries++;
             }
         }
@@ -82,8 +67,6 @@ public class BrokerMarketWorker extends MarketThread {
     }
 
     public void run() {
-        stderr.println("BrokerMarketWorker.run");
-        
         Message msg = null;
         Message res = null;
         
@@ -91,24 +74,23 @@ public class BrokerMarketWorker extends MarketThread {
             if (messageQueue.size() <= 0) {
                 synchronized(this) {
                     try {
-                        stdout.println("BrokerMarketWorker.run going sleep");
                         wait();
                     }
                     catch (Exception e) {
-                        e.printStackTrace();
+                        stderr.println(e.getMessage());
                     }
                 }
             }
             
-            if (reconnect()) {
-                msg = dequeue();
-                
-                if (msg != null) {
-                    res = toMarket(msg);
-                }
-                
+            msg = dequeue();
+            
+            if (msg != null && connectionOk()) {
+                res = toMarket(msg);
                 if (res != null) {
                     brokerServer.enqueueToClient(res);
+                }
+                else {
+                    marketSocket = null;
                 }
             }
             else {
@@ -118,42 +100,39 @@ public class BrokerMarketWorker extends MarketThread {
     }
     
     public synchronized void stopMe() {
-        stderr.println("BrokerMarketWorker.stopMe");
-        
-        try {
-            marketSocket.close();
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-        
         super.stopMe();
+        cleanup();
     }
     
+    private void cleanup() {
+        try {
+            if (marketSocket != null && marketSocket.isConnected()) {
+                marketSocket.close();
+            }
+        }
+        catch (Exception e){
+            stderr.println(e.getMessage());
+        }
+    }
+
     private Message toMarket(Message msg) {
-        stderr.println("BrokerMarketWorker.toMarket");
-        
         sendMessage(msg);
         return receiveMessage();
     }
 
     private Message receiveMessage() {
-        stderr.println("BrokerMarketWorker.receiveMessage");
-        
         Message msg = null;
         
         try {
             msg = new Message(netIn.readLine());
         } catch (Exception e) {
-            e.printStackTrace();
+            stderr.println(e.getMessage());
         }
         
         return msg;
     }
     
     private void sendMessage(Message msg) {
-        stderr.println("BrokerMarketWorker.sendMessage");
-        
         netOut.println(msg.toStr());
     }
 }

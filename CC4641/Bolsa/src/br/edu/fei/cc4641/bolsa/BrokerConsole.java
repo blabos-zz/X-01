@@ -2,15 +2,15 @@ package br.edu.fei.cc4641.bolsa;
 
 import java.io.IOException;
 
-public class MarketServerConsole extends MarketThread {
-    private MarketServer server = null;
+public class BrokerConsole extends MarketThread {
+    private BrokerServer server = null;
     
-    public MarketServerConsole(MarketServer server) {
+    public BrokerConsole(BrokerServer server) {
         this.server = server;
     }
     
     public void run() {
-        stdout.println("Market Console");
+        stdout.println("Broker Console");
         while(!canStop()) {
             try {
                 prompt();
@@ -21,12 +21,34 @@ public class MarketServerConsole extends MarketThread {
             }
         }
         
-        stopSever();
+        stopBroker();
     }
-
+    
+    private void stopBroker() {
+        if (server.isAlive()) {
+            server.stopMe();
+        }
+    }
+    
+    private void prompt() {
+        stdout.print("% ");
+    }
+    
+    private String nextCmd() throws IOException {
+        String line = null;
+        try {
+            line = stdin.readLine().toLowerCase();
+        }
+        catch (Exception e) {}
+        
+        if (line == null) stdout.print("EOF");
+        
+        return line; 
+    }
+    
     private void execute(String cmd) {
         if (cmd == null || cmd.equals("exit")) {
-            exitMe();
+            stopMe();
         }
         else if (cmd.equals("help")) {
             printHelp();
@@ -38,12 +60,12 @@ public class MarketServerConsole extends MarketThread {
             error(cmd);
         }
     }
-
+    
     private void printClients() {
         stdout.println("\nMarket Clients:");
         
-        if (MarketServer.clients.size() > 0) {
-            for (String key : MarketServer.clients.keySet()) {
+        if (server.clients.size() > 0) {
+            for (String key : server.clients.keySet()) {
                 stdout.println(key);
             }
         }
@@ -51,44 +73,18 @@ public class MarketServerConsole extends MarketThread {
             stdout.println("No active clients");
         }
     }
-
-    private void exitMe() {
-        stopMe();
-    }
-
+    
     private void error(String cmd) {
         if (cmd.length() > 0) {
             stderr.println("Invalid command '" + cmd + "'");
         }
     }
-
-    private void stopSever() {
-        if (server.isAlive()) {
-            server.stopMe();
-        }
-    }
-
+    
     private void printHelp() {
-        stdout.println("Market Server Help");
+        stdout.println("Broker Help");
         stdout.println("Commands:");
         stdout.println("    help     - Displays this message.");
         stdout.println("    exit     - Exits and stops the server.");
         stdout.println("    clients  - Show active clients.");
-    }
-
-    void prompt() {
-        stdout.print("# ");
-    }
-
-    private String nextCmd() throws IOException {
-        String line = null;
-        try {
-            line = stdin.readLine().toLowerCase();
-        }
-        catch (Exception e) {}
-        
-        if (line == null) stdout.print("EOF");
-        
-        return line; 
     }
 }

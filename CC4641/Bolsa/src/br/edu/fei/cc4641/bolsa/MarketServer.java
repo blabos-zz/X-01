@@ -1,35 +1,34 @@
 package br.edu.fei.cc4641.bolsa;
 import java.net.*;
+import java.util.HashMap;
 import java.io.*;
 
 public class MarketServer extends MarketThread {
     private int port                    = 7070;
-    private ServerSocket server         = null;
+    private ServerSocket serverSocket   = null;
     private MarketServerConsole console = null;
+    
+    static HashMap<String, MarketClient> clients = null;
+    private static int marketClientId = 0;
 
     public MarketServer(int port) {
         this.port       = ((port > 1023) && (port < 65536)) ? port: 7070;
         this.console    = new MarketServerConsole(this);
-        start();
+        
+        MarketServer.clients = new HashMap<String, MarketClient>();
     }
 
     public void stopMe() {
-        try {
-            server.close();
-        }
-        catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-        
         super.stopMe();
+        cleanup();
     }
 
     public void run() {
         try {
-            server = new ServerSocket(port);
+            serverSocket = new ServerSocket(port);
         }
         catch (IOException e) {
-            System.err.println(e.getMessage());
+            stderr.println(e.getMessage());
             return;
         }
         
@@ -37,12 +36,52 @@ public class MarketServer extends MarketThread {
 
         while(!canStop()) {
             try {
-                @SuppressWarnings("unused")
-                MarketClient client = new MarketClient(server.accept());
-                System.out.println("Processing new client");
+                String name = "Market Client #" + nextclientId();
+                MarketClient client
+                    = new MarketClient(name, serverSocket.accept());
+                clients.put(name, client);
             } catch (IOException e) {
                 System.err.println(e.getMessage());
             }
+        }
+        
+        cleanup();
+    }
+
+    private void cleanup() {
+        try {
+            if (serverSocket != null && !serverSocket.isClosed()) {
+                serverSocket.close();
+            }
+            
+            if (clients.size() > 0) {
+                for (String key : clients.keySet()) {
+                    MarketClient c = clients.get(key);
+                    if (c != null) {
+                        c.stopMe();
+                    }
+                }
+                clients.clear();
+            }
+            
+                
+        }
+        catch (Exception e) {
+            stderr.println("Error stopping Market Server");
+        }
+    }
+
+    private static int  nextclientId() {
+        return ++MarketServer.marketClientId;
+    }
+
+    public static void cleanClient(String name) {
+        synchronized (clients) {
+            MarketClient c = clients.get(name);
+            if (c != null) {
+                c = null;
+            }
+            clients.remove(name);
         }
     }
 }

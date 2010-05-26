@@ -61,7 +61,9 @@ public class Message extends HashMap<String, String> {
      * @return Field name as String
      */
     public String asString(String key) {
-        return get(key);
+        String value = get(key);
+        
+        return value == null ? "" : value;
     }
     
     /**
@@ -71,7 +73,7 @@ public class Message extends HashMap<String, String> {
      * @return Last value of field
      */
     public String put(String key, double value) {
-    return put(key, "" + value);
+        return put(key, "" + value);
     }
     
     /**
@@ -335,7 +337,7 @@ public class Message extends HashMap<String, String> {
     }
     
     public void ckeckGreeting() throws InvalidMessage {
-        checkHeader();
+        //checkHeader();
         
         {
             int oper = asInt("operation");

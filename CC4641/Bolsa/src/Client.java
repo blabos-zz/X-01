@@ -1,4 +1,5 @@
 import java.io.*;
+import java.lang.management.ManagementFactory;
 import java.net.*;
 import java.util.HashMap;
 
@@ -6,7 +7,16 @@ import br.edu.fei.cc4641.bolsa.*;
 
 public class Client {
     public static void main(String[] args) {
-        ClientAgent agent = new ClientAgent("localhost", 7080);
+        String host = "localhost";
+        int port    = 7080;
+        
+        try {
+            host = args[0];
+            port = Integer.parseInt(args[1]);
+        }
+        catch (Exception e) {}
+        
+        ClientAgent agent = new ClientAgent(host, port);
         agent.start();
     }
 }
@@ -33,25 +43,28 @@ class ClientAgent extends MarketThread {
     }
 
     public void stopMe() {
-        cleanup();
         super.stopMe();
+        cleanup();
     }
     
     public void run() {
         int cmd = CMD_NULL;
         
         if (sendGreeting()) {
-            stdout.println("Market Client ver 1.0");
-            stdout.println("clientId: " + this.clientId);
+            stdout.println("Market Client ver 1.0, clientId: " + clientId);
+            stdout.println("Connected to: " + host + ":" + port);
+        }
+        else {
+            return;
         }
         
         while (!canStop()) {
-            if (connectionOk() && ((cmd = netxCommand()) != CMD_EXIT)) {
+            if ((cmd = netxCommand()) != CMD_EXIT) {
                 Message response = null;
                 
                 switch (cmd) {
                     case CMD_SEND:
-                        if(sendNewOrder()) {
+                        if(connectionOk() && sendNewOrder()) {
                             response = receiveResponse();
                             showResponse(response);
                             updateAccount(response);
@@ -71,18 +84,23 @@ class ClientAgent extends MarketThread {
             }
         }
     }
-    
+
     private boolean sendGreeting() {
         boolean ret = false;
         
         if (connectionOk()) {
             Message res = null;
             try {
-                netOut.println("operation=" + Operation.GREETING
-                        + "&greet=Hello+World\n");
+                clientId = ManagementFactory.getRuntimeMXBean().getName();
+                
+                netOut.println(
+                        "operation=" + Operation.GREETING
+                        + "&clientId=" + clientId 
+                        + "&greet=Hello+World");
                 
                 res = new Message(netIn.readLine());
-                this.clientId = res.asString("clientId");
+                clientId = res.asString("clientId");
+                
                 ret = true;
             } catch (Exception e) {
                 stderr.println(e.getMessage());
@@ -144,25 +162,32 @@ class ClientAgent extends MarketThread {
     }
 
     private void updateAccount(Message response) {
-        int oper    = response.asInt("operation");
-        int reqOper = response.asInt("reqOper");
-        
-        if (oper == Operation.ACCEPT) {
-            String symbol = response.asString("symbol");
+        if (response != null) {
+            int oper    = response.asInt("operation");
+            int reqOper = response.asInt("reqOper");
             
-            double value    = response.asDouble("value");
-            double quotas   = response.asDouble("quotas");
-            double total    = response.asDouble("total");
-            
-            Account account = Account.instance();
-            if (reqOper == Operation.BUY) {
-                account.updateShare(symbol, +quotas);
-                account.updBalance(-total);
+            if (oper == Operation.ACCEPT) {
+                String symbol   = response.asString("symbol");
+                double quotas   = response.asDouble("quotas");
+                double total    = response.asDouble("total");
+                
+                Account account = Account.instance();
+                if (reqOper == Operation.BUY) {
+                    account.updateShare(symbol, +quotas);
+                    account.updBalance(-total);
+                }
+                else {
+                    account.updateShare(symbol, -quotas);
+                    account.updBalance(+total);
+                }
+                
+                if (account.get(symbol).getQuotas() <= 0.0) {
+                    account.remove(symbol);
+                }
             }
-            else {
-                account.updateShare(symbol, -quotas);
-                account.updBalance(+total);
-            }
+        }
+        else {
+            stdout.println("Invalid response received");
         }
     }
 
@@ -173,6 +198,7 @@ class ClientAgent extends MarketThread {
             msg = new Message(netIn.readLine());
         }
         catch (Exception e) {
+            clientSocket = null;
             stderr.println(e.getMessage());
         }
 
@@ -195,6 +221,9 @@ class ClientAgent extends MarketThread {
         Message msg = null;
         try {
             msg = new Message();
+            
+            msg.put("clientId", clientId);
+            
             stdout.println("\nNew Order:");
             
             stdout.println("\nOperation:");
@@ -277,11 +306,14 @@ class ClientAgent extends MarketThread {
         prompt();
         
         try {
-            cmd = Integer.parseInt(stdin.readLine());
-        }
-        catch (NumberFormatException e) {
-            System.out.println("EOF");
-            cmd = CMD_NULL;
+            String line = stdin.readLine();
+            
+            if (line == null) {
+                System.out.println("EOF");
+                return CMD_EXIT;
+            }
+            
+            cmd = Integer.parseInt(line);
         }
         catch (Exception e) {
             cmd = CMD_NULL;
@@ -296,6 +328,10 @@ class ClientAgent extends MarketThread {
 
     private boolean connectionOk() {
         int retries = 0;
+        
+        if (clientSocket != null && clientSocket.isConnected()) {
+            return true;
+        }
         
         while (retries < 3) {
             try {
@@ -324,7 +360,7 @@ class ClientAgent extends MarketThread {
 
     private void cleanup() {
         try {
-            if (clientSocket != null) {
+            if (clientSocket != null && clientSocket.isConnected()) {
                 clientSocket.close();
             }
         } catch (Exception e) {

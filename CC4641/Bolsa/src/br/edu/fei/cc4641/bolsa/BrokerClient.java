@@ -11,14 +11,14 @@ public class BrokerClient extends MarketThread {
     private Socket clientSocket                 = null;
     private BufferedReader netIn                = null;
     private PrintWriter netOut                  = null;
-    private BrokerServer server                 = null;
+    private BrokerServer brokerServer           = null;
     private LinkedList<Message> messageQueue    = null;
     
     
     public BrokerClient(Socket client, BrokerServer server)
     throws IOException {
         this.clientSocket   = client;
-        this.server         = server;
+        this.brokerServer         = server;
         
         setName("" + BrokerServer.nextClientId());
     
@@ -28,20 +28,16 @@ public class BrokerClient extends MarketThread {
         netIn  = new BufferedReader(
                 new InputStreamReader(
                         this.clientSocket.getInputStream()));
-        
-        start();
     }
 
     private synchronized Message dequeue() {
-        stdout.println("BrokerClient.dequeue");
-        
         Message msg = null;
         
         try {
-            msg = (Message)messageQueue.removeFirst();
+            msg = messageQueue.removeFirst();
         }
         catch (Exception e) {
-            e.printStackTrace();
+            stderr.println(e.getMessage());
         }
     
         return msg;
@@ -52,62 +48,58 @@ public class BrokerClient extends MarketThread {
     }
     
     private Message receiveMessage() {
-        stdout.println("BrokerClient.receiveMessage");
-        
         Message msg = null;
         
         try {
-            String line = netIn.readLine();
-            if (line == null) {
-                throw new IOException("Connection closed by peer");
-            }
-            
-            msg = new Message(line);
+            msg = new Message(netIn.readLine());
             msg.put("clientId", getName());
-            msg.checkHeader();
-        }
-        catch (IOException e) {
-            stdout.println(e.getMessage() + ". Closing client connection");
         }
         catch (Exception e) {
-            stdout.println(e.getMessage());
-            msg = new Message();
-            msg.put("operation", Operation.ERROR);
-            msg.put("error", e.getMessage());
-            netOut.println(msg.toStr());
-            msg = null;
+            stderr.println(e.getMessage());
         }
     
         return msg;
     }
+    
+    public void stopMe() {
+        super.stopMe();
+        cleanup();
+    }
+
+    private void cleanup() {
+        if (clientSocket != null && clientSocket.isConnected()) {
+            try {
+                clientSocket.close();
+            } catch (Exception e) {
+                stderr.println(e.getMessage());
+            }
+        }
+    }
 
     public void run() {
-        stdout.println("BrokerClient.run");
-        
         while(!canStop()) {
             Message msg = receiveMessage();
             
             if (msg != null) {
-                server.enqueueToWorker(msg);
+                brokerServer.enqueueToWorker(msg);
+                
+                synchronized(this) {
+                    try {
+                        wait();
+                    }
+                    catch (Exception e) {
+                        stderr.println(e.getMessage());
+                    }
+                }
+                
+                Message res = dequeue();
+                
+                if (res != null) {
+                    sendMessage(res);
+                }
             }
             else {
-                return;
-            }
-    
-            synchronized(this) {
-                try {
-                    stdout.println("BrokerClient.run going sleep");
-                    wait();
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            
-            Message res = dequeue();
-            
-            if (res != null) {
-                sendMessage(res);
+                stopMe();
             }
         }
     }

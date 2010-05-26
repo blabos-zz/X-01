@@ -5,26 +5,45 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 
 public class MarketClient extends MarketThread {
-    private Socket client           = null;
+    private Socket clientSocket           = null;
     private PrintWriter netOut      = null;
     private BufferedReader netIn    = null;
     
-    public MarketClient(Socket client) throws IOException {
-        this.client = client;
+    public MarketClient(String name, Socket client) throws IOException {
+        super(name);
+        
+        clientSocket = client;
         
         netOut
-            = new PrintWriter(this.client.getOutputStream(), true);
+            = new PrintWriter(this.clientSocket.getOutputStream(), true);
         
         netIn
             = new BufferedReader(
                     new InputStreamReader(
-                            this.client.getInputStream()));
+                            this.clientSocket.getInputStream()));
         
         start();
     }
     
+    public void stopMe() {
+        super.stopMe();
+        cleanup();
+    }
+    
+    private void cleanup() {
+        if (clientSocket != null && !clientSocket.isClosed()) {
+            try {
+                clientSocket.close();
+            } catch (Exception e) {
+                stderr.println(e.getMessage());
+            }
+            clientSocket = null;
+        }
+    }
+
     public void run() {
         while (!canStop()) {
             Message msg = null;
@@ -34,10 +53,13 @@ public class MarketClient extends MarketThread {
             
             if (msg == null) {
                 netOut.close();
-                return;
+                break;
             }
             
-            System.out.println(msg.toXML());
+            synchronized (this) {
+                stdout.println(getName() + " processing message:");
+                stdout.println(msg.toXML());
+            }
             
             switch (msg.asInt("operation")) {
                 case Operation.BUY:
@@ -56,32 +78,25 @@ public class MarketClient extends MarketThread {
                     res = procOperNotFound(msg);
             }
             
-            System.out.println(res.toXML());
+            synchronized (this) {
+                stdout.println(getName() + " response message:");
+                stdout.println(res.toXML());
+            }
+            
             netOut.println(res.toStr());
         }
+        
+        MarketServer.cleanClient(getName());
     }
 
     private Message getMsg() {
         Message msg = null;
+        
         try {
-            String line = netIn.readLine();
-            if (line == null) {
-                throw new IOException("Connection closed by peer");
-            }
-            
-            msg = new Message(line);
-            
-            msg.checkHeader();
-        } catch (IOException e) {
-            System.out.println(e.getMessage()
-                    + ". Closing client connection");
+            msg = new Message(netIn.readLine());
         }
         catch (Exception e) {
-            System.out.println(e.getMessage());
-            msg = new Message();
-            msg.put("operation", Operation.ERROR);
-            msg.put("error", e.getMessage());
-            netOut.println(msg.toStr());
+            stderr.println(e.getMessage());
             msg = null;
         }
         
@@ -89,7 +104,7 @@ public class MarketClient extends MarketThread {
     }
 
     private Message procGreeting(Message msg) {
-        Message resp    = new Message();
+        Message resp = new Message();
         
         String clientId = msg.asString("clientId");
         
@@ -97,8 +112,6 @@ public class MarketClient extends MarketThread {
             String greeting = "";
             
             msg.ckeckGreeting();
-            
-            System.out.println(msg.toXML());
             
             greeting += "Welcome " + clientId + "! ";
             greeting += "I'm Market v 2.0. ";
@@ -190,6 +203,9 @@ public class MarketClient extends MarketThread {
                         resp.put("total",       total);
                         resp.put("operation",   Operation.ACCEPT);
                         resp.put("reqOper",     Operation.SELL);
+                        
+                        unitValue *= 1.0 - Math.random() / 5.0;
+                        share.setUnitValue(unitValue);
                     }
                     else {
                         resp.put("operation",   Operation.REJECT);
@@ -251,6 +267,9 @@ public class MarketClient extends MarketThread {
                         resp.put("total",       total);
                         resp.put("operation",   Operation.ACCEPT);
                         resp.put("reqOper",     Operation.BUY);
+                        
+                        unitValue *= 1.0 + Math.random() / 5.0;
+                        share.setUnitValue(unitValue);
                     }
                     else {
                         resp.put("operation",   Operation.REJECT);

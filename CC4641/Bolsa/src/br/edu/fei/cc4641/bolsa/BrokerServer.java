@@ -12,29 +12,28 @@ public class BrokerServer extends MarketThread {
     
     private ServerSocket brokerServerSocket         = null;
     private BrokerMarketWorker marketWorker         = null;
-    private HashMap<String, BrokerClient> clients   = null;
+    HashMap<String, BrokerClient> clients           = null;
     
     private static int clientId                     = 0;
+    
+    private BrokerConsole console                   = null;
     
     
     public BrokerServer(int brokerPort, String marketHost, int marketPort)
     throws IOException {
-        stderr.println("BrokerServer.BrokerServer");
-        
         this.brokerServerPort   = brokerPort;
         this.marketHost         = marketHost;
         this.marketPort         = marketPort;
         
         brokerServerSocket      = new ServerSocket(brokerServerPort);
-        marketWorker            = new BrokerMarketWorker(this);
         clients                 = new HashMap<String, BrokerClient>();
         
-        start();
+
+        marketWorker            = new BrokerMarketWorker(this);
+        console                 = new BrokerConsole(this);
     }
     
     public void enqueueToClient(Message msg) {
-        stderr.println("BrokerServer.enqueueToClient");
-        
         String clientId = msg.asString("clientId");
         BrokerClient client = clients.get(clientId);
         
@@ -47,14 +46,12 @@ public class BrokerServer extends MarketThread {
                 }
             }
             catch (Exception e) {
-                e.printStackTrace();
+                stderr.println(e.getMessage());
             }
         }
     }
     
     public void enqueueToWorker(Message msg) {
-        stderr.println("BrokerServer.enqueueToWorker");
-        
         marketWorker.enqueue(msg);
         
         try {
@@ -63,55 +60,64 @@ public class BrokerServer extends MarketThread {
             }
         }
         catch (Exception e) {
-            e.printStackTrace();
+            stderr.println(e.getMessage());
         }
-        
     }
     
     public String marketHost() {
-        stderr.println("BrokerServer.sendMessage");
-        
         return marketHost;
     }
 
     public int marketPort() {
-        stderr.println("BrokerServer.marketPort");
-        
         return marketPort;
     }
 
     public void run() {
-        stderr.println("BrokerServer.run");
+
+        console.start();
+        marketWorker.start();
         
         while(!canStop()) {
             try {
-                BrokerClient client
-                    = new BrokerClient(brokerServerSocket.accept(), this);
-                clients.put(client.getName(), client);
+                synchronized (clients) {
+                    BrokerClient client
+                        = new BrokerClient(brokerServerSocket.accept(), this);
+                    clients.put(client.getName(), client);
+                    client.start();
+                }   
             }
             catch (Exception e) {
-                e.printStackTrace();
+                stderr.println(e.getMessage());
             }
         }
+        
+        marketWorker.stopMe();
+        console.stopMe();
     }
     
     public synchronized void stopMe() {
-        stderr.println("BrokerServer.stopMe");
-        
+        super.stopMe();
+        cleanup();
+    }
+
+    private void cleanup() {
         try {
-            brokerServerSocket.close();
-            marketWorker.stopMe();
+            for (String key : clients.keySet()) {
+                BrokerClient c = clients.get(key);
+                c.stopMe();
+            }
+            clients.clear();
             
-            super.stopMe();
+            if (brokerServerSocket != null && !brokerServerSocket.isClosed()){
+                brokerServerSocket.close();
+            }
         }
         catch (Exception e) {
-            e.printStackTrace();
+            stderr.println(e.getMessage());
         }
     }
 
     public synchronized static int nextClientId() {
-        System.err.println("BrokerServer.nextClientId");
-        
         return ++BrokerServer.clientId;
     }
 }
