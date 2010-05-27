@@ -4,17 +4,14 @@ import java.util.HashMap;
 import java.io.*;
 
 public class MarketServer extends MarketThread {
-    private int port                    = 7070;
-    private ServerSocket serverSocket   = null;
-    private MarketServerConsole console = null;
+    private ServerSocket serverSocket               = null;
+    static HashMap<String, MarketClient> clients    = null;
+    private Config conf                             = null;
+    private static int marketClientId               = 0;
     
-    static HashMap<String, MarketClient> clients = null;
-    private static int marketClientId = 0;
-
-    public MarketServer(int port) {
-        this.port       = ((port > 1023) && (port < 65536)) ? port: 7070;
-        this.console    = new MarketServerConsole(this);
-        
+    
+    public MarketServer(Config cfg) {
+        this.conf = cfg;      
         MarketServer.clients = new HashMap<String, MarketClient>();
     }
 
@@ -25,21 +22,20 @@ public class MarketServer extends MarketThread {
 
     public void run() {
         try {
-            serverSocket = new ServerSocket(port);
+            serverSocket = new ServerSocket(conf.getListenPort());
         }
         catch (IOException e) {
             stderr.println(e.getMessage());
             return;
         }
-        
-        console.start();
 
         while(!canStop()) {
             try {
                 String name = "Market Client #" + nextclientId();
                 MarketClient client
-                    = new MarketClient(name, serverSocket.accept());
+                    = new MarketClient(name, serverSocket.accept(), conf);
                 clients.put(name, client);
+                client.start();
             } catch (IOException e) {
                 System.err.println(e.getMessage());
             }
@@ -48,7 +44,7 @@ public class MarketServer extends MarketThread {
         cleanup();
     }
 
-    private void cleanup() {
+    void cleanup() {
         try {
             if (serverSocket != null && !serverSocket.isClosed()) {
                 serverSocket.close();
@@ -77,10 +73,6 @@ public class MarketServer extends MarketThread {
 
     public static void cleanClient(String name) {
         synchronized (clients) {
-            MarketClient c = clients.get(name);
-            if (c != null) {
-                c = null;
-            }
             clients.remove(name);
         }
     }

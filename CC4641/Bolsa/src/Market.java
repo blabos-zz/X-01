@@ -4,8 +4,10 @@ public class Market {
     public static void main(String[] args) {
         Book.init();
         
-        MarketServer server = new MarketServer(7070);
-        server.start();
+        MarketServerConsole console = MarketServerConsole.instance();
+        
+        console.newMarketServer("Query",  7070, Protocol.PROTO_QUERYSTRING);
+        console.newMarketServer("Serial", 7071, Protocol.PROTO_SERIALIZED);
     }
 
 }

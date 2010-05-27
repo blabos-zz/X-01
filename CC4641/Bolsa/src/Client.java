@@ -9,14 +9,16 @@ public class Client {
     public static void main(String[] args) {
         String host = "localhost";
         int port    = 7080;
+        int proto   = Protocol.PROTO_QUERYSTRING;
         
         try {
-            host = args[0];
-            port = Integer.parseInt(args[1]);
+            host    = args[0];
+            port    = Integer.parseInt(args[1]);
+            proto   = Integer.parseInt(args[2]);
         }
         catch (Exception e) {}
         
-        ClientAgent agent = new ClientAgent(host, port);
+        ClientAgent agent = new ClientAgent(new Config(host, port, 0, proto));
         agent.start();
     }
 }
@@ -28,18 +30,14 @@ class ClientAgent extends MarketThread {
     private final int CMD_SEND      = 1;
     private final int CMD_SHOW      = 2;
     
-    private String host             = "localhost";
-    private int port                = 7080;
+    private Config conf             = null;
     
-    private Socket clientSocket     = null;
-    private PrintWriter netOut      = null;
-    private BufferedReader netIn    = null;
+    private NetStream netStream     = null;
     private String clientId;
     
     
-    public ClientAgent(String host, int port) {
-        this.host = host;
-        this.port = port;
+    public ClientAgent(Config cfg) {
+        conf = cfg;
     }
 
     public void stopMe() {
@@ -52,7 +50,9 @@ class ClientAgent extends MarketThread {
         
         if (sendGreeting()) {
             stdout.println("Market Client ver 1.0, clientId: " + clientId);
-            stdout.println("Connected to: " + host + ":" + port);
+            stdout.println("Connected to: " + conf.getServerHost() + ":"
+                    + conf.getServerPort() + " using protocol: "
+                    + conf.getProtocol());
         }
         else {
             return;
@@ -92,13 +92,12 @@ class ClientAgent extends MarketThread {
             Message res = null;
             try {
                 clientId = ManagementFactory.getRuntimeMXBean().getName();
-                
-                netOut.println(
+                netStream.writeMessage(new Message(
                         "operation=" + Operation.GREETING
                         + "&clientId=" + clientId 
-                        + "&greet=Hello+World");
+                        + "&greet=Hello+World"));
                 
-                res = new Message(netIn.readLine());
+                res = netStream.readMessage();
                 clientId = res.asString("clientId");
                 
                 ret = true;
@@ -195,10 +194,10 @@ class ClientAgent extends MarketThread {
         Message msg = null;
         
         try {
-            msg = new Message(netIn.readLine());
+            msg = netStream.readMessage();
         }
         catch (Exception e) {
-            clientSocket = null;
+            netStream = null;
             stderr.println(e.getMessage());
         }
 
@@ -210,7 +209,7 @@ class ClientAgent extends MarketThread {
         Message msg = collectFields();
         
         if (msg != null) {
-            netOut.println(msg.toStr());
+            netStream.writeMessage(msg);
             ret = true;
         }
         
@@ -329,22 +328,15 @@ class ClientAgent extends MarketThread {
     private boolean connectionOk() {
         int retries = 0;
         
-        if (clientSocket != null && clientSocket.isConnected()) {
+        if (netStream != null) {
             return true;
         }
         
         while (retries < 3) {
             try {
-                clientSocket
-                    = new Socket(host, port);
-                
-                netOut
-                    = new PrintWriter(clientSocket.getOutputStream(), true);
-                
-                netIn
-                    = new BufferedReader(
-                            new InputStreamReader(
-                                    clientSocket.getInputStream()));
+                Socket socket
+                    = new Socket(conf.getServerHost(), conf.getServerPort());
+                netStream = new NetStream(socket, conf);
                 
                 return true;
             } catch (Exception e) {
@@ -359,15 +351,7 @@ class ClientAgent extends MarketThread {
     }
 
     private void cleanup() {
-        try {
-            if (clientSocket != null && clientSocket.isConnected()) {
-                clientSocket.close();
-            }
-        } catch (Exception e) {
-            stderr.println("Error closing client socket: " + e.getMessage());
-        }
-        
-        clientSocket = null;
+        netStream = null;
     }
 }
 

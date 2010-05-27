@@ -1,12 +1,45 @@
 package br.edu.fei.cc4641.bolsa;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 public class MarketServerConsole extends MarketThread {
-    private MarketServer server = null;
+    private static MarketServerConsole myself       = null;
+    private HashMap<String, MarketServer> servers   = null;
     
-    public MarketServerConsole(MarketServer server) {
-        this.server = server;
+    protected MarketServerConsole() {
+        servers = new HashMap<String, MarketServer>();
+    }
+    
+    public synchronized static MarketServerConsole instance() {
+        if (myself == null) {
+            myself = new MarketServerConsole();
+            myself.start();
+        }
+        
+        return myself;
+    }
+    
+    public void newMarketServer(String name, int port, int proto) {
+        MarketServer server
+            = new MarketServer(new Config("", 0, port, proto));
+        
+        server.start();
+        
+        servers.put("" + proto, server);
+    }
+    
+    public void stopMe() {
+        super.stopMe();
+        cleanup();
+    }
+
+    private void cleanup() {
+        for (MarketServer server: servers.values()) {
+            server.stopMe();
+            server.cleanup();
+        }
+        servers.clear();
     }
     
     public void run() {
@@ -20,40 +53,18 @@ public class MarketServerConsole extends MarketThread {
                 e.printStackTrace();
             }
         }
-        
-        stopSever();
     }
 
     private void execute(String cmd) {
         if (cmd == null || cmd.equals("exit")) {
-            exitMe();
+            stopMe();
         }
         else if (cmd.equals("help")) {
             printHelp();
         }
-        else if (cmd.equals("clients")) {
-            printClients();
-        }
         else {
             error(cmd);
         }
-    }
-
-    private void printClients() {
-        stdout.println("\nMarket Clients:");
-        
-        if (MarketServer.clients.size() > 0) {
-            for (String key : MarketServer.clients.keySet()) {
-                stdout.println(key);
-            }
-        }
-        else {
-            stdout.println("No active clients");
-        }
-    }
-
-    private void exitMe() {
-        stopMe();
     }
 
     private void error(String cmd) {
@@ -62,18 +73,11 @@ public class MarketServerConsole extends MarketThread {
         }
     }
 
-    private void stopSever() {
-        if (server.isAlive()) {
-            server.stopMe();
-        }
-    }
-
     private void printHelp() {
         stdout.println("Market Server Help");
         stdout.println("Commands:");
         stdout.println("    help     - Displays this message.");
         stdout.println("    exit     - Exits and stops the server.");
-        stdout.println("    clients  - Show active clients.");
     }
 
     void prompt() {

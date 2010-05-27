@@ -4,13 +4,14 @@ import java.io.*;
 import java.net.*;
 import java.util.LinkedList;
 
-public class BrokerClient extends MarketThread {
+public class BrokerWorker extends MarketThread {
+    public static final int MAX_RETRIES         = 3;
     private Config conf                         = null;
     private NetStream netStream                 = null;
     private LinkedList<Message> messageQueue    = null;
     
     
-    public BrokerClient(String name, Socket client, Config cfg)
+    public BrokerWorker(String name, Socket client, Config cfg)
     throws IOException {
         super(name);
         conf = cfg;
@@ -23,26 +24,15 @@ public class BrokerClient extends MarketThread {
         cleanup();
     }
     
-    private void cleanup() {
+    void cleanup() {
         netStream.cleanup();
     }
     
     public void run() {
-        while(!canStop()) {
-            Message msg = null;
-            Message res = null;
-            
-            msg = netStream.readMessage();
-            
-            if (msg == null) {
-                netStream = null;
-                break;
-            }
-            
-            msg.put("clientId", getName());
-            
-            BrokerConsole.enqueueToWorker(conf.getProtocol(), msg);
-            
+        Message msg = null;
+        Message res = null;
+        
+        while (!canStop()) {
             if (messageQueue.size() <= 0) {
                 synchronized(this) {
                     try {
@@ -54,16 +44,23 @@ public class BrokerClient extends MarketThread {
                 }
             }
             
-            res = dequeue();
+            msg = dequeue();
             
-            if (res != null) {
-                netStream.writeMessage(res);
+            if (msg != null) {
+                res = toMarket(msg);
+                if (res != null) {
+                    BrokerConsole.enqueueToClient(conf.getProtocol(), res);
+                }
+                else {
+                    stopMe();
+                }
+            }
+            else {
+                stopMe();
             }
         }
-        
-        BrokerServer.cleanClient(getName());
     }
-
+    
     private synchronized Message dequeue() {
         Message msg = null;
         
@@ -73,11 +70,16 @@ public class BrokerClient extends MarketThread {
         catch (Exception e) {
             stderr.println(e.getMessage());
         }
-    
+        
         return msg;
     }
-
+    
     public synchronized void enqueue(Message msg) {
         messageQueue.addLast(msg);
+    }
+    
+    private Message toMarket(Message msg) {
+        netStream.writeMessage(msg);
+        return netStream.readMessage();
     }
 }

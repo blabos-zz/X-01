@@ -1,12 +1,67 @@
 package br.edu.fei.cc4641.bolsa;
 
 import java.io.IOException;
+import java.net.Socket;
+import java.util.HashMap;
 
 public class BrokerConsole extends MarketThread {
-    private BrokerServer server = null;
+    private static BrokerConsole myself             = null;
+    private HashMap<String, BrokerServer> servers   = null;
+    private HashMap<String, BrokerWorker> workers   = null;
+    private static int brokerClientId               = 0;
     
-    public BrokerConsole(BrokerServer server) {
-        this.server = server;
+    public BrokerConsole() {
+        servers = new HashMap<String, BrokerServer>();
+        workers = new HashMap<String, BrokerWorker>();
+    }
+    
+    public synchronized static BrokerConsole instance() {
+        if (myself == null) {
+            myself = new BrokerConsole();
+            myself.start();
+        }
+        
+        return myself;
+    }
+    
+    public void newBrokerInstance(String name, String marketHost,
+            int marketPort, int listenPort, int proto) {
+        
+        try {
+            Config conf = new Config(marketHost, marketPort, listenPort, proto);
+            Socket work = new Socket(marketHost, marketPort);
+            
+            BrokerServer server = new BrokerServer(conf);
+            BrokerWorker worker = new BrokerWorker(name, work, conf);
+            
+            servers.put("" + proto, server);
+            workers.put("" + proto, worker);
+            
+            server.start();
+            worker.start();
+        }
+        catch (Exception e) {
+            stderr.println(e.getMessage());
+        }
+    }
+    
+    public void stopMe() {
+        super.stopMe();
+        cleanup();
+    }
+    
+    private void cleanup() {
+        for (BrokerServer server: servers.values()) {
+            server.stopMe();
+            server.cleanup();
+        }
+        servers.clear();
+        
+        for (BrokerWorker worker: workers.values()) {
+            worker.stopMe();
+            worker.cleanup();
+        }
+        workers.clear();
     }
     
     public void run() {
@@ -19,14 +74,6 @@ public class BrokerConsole extends MarketThread {
                 System.err.println(e.getMessage());
                 e.printStackTrace();
             }
-        }
-        
-        stopBroker();
-    }
-    
-    private void stopBroker() {
-        if (server.isAlive()) {
-            server.stopMe();
         }
     }
     
@@ -53,24 +100,8 @@ public class BrokerConsole extends MarketThread {
         else if (cmd.equals("help")) {
             printHelp();
         }
-        else if (cmd.equals("clients")) {
-            printClients();
-        }
         else {
             error(cmd);
-        }
-    }
-    
-    private void printClients() {
-        stdout.println("\nMarket Clients:");
-        
-        if (server.clients.size() > 0) {
-            for (String key : server.clients.keySet()) {
-                stdout.println(key);
-            }
-        }
-        else {
-            stdout.println("No active clients");
         }
     }
     
@@ -85,6 +116,32 @@ public class BrokerConsole extends MarketThread {
         stdout.println("Commands:");
         stdout.println("    help     - Displays this message.");
         stdout.println("    exit     - Exits and stops the server.");
-        stdout.println("    clients  - Show active clients.");
+    }
+
+    public synchronized static void enqueueToWorker(int proto, Message msg) {
+        String key = "" + proto;
+        BrokerWorker worker = instance().workers.get(key);
+        
+        synchronized (worker) {
+            worker.enqueue(msg);
+            worker.notify();
+        }
+    }
+    
+    public synchronized static void enqueueToClient(int proto, Message msg) {
+        String key = "" + proto;
+        BrokerServer server = instance().servers.get(key);
+        
+        String clientId = msg.asString("clientId");
+        BrokerClient client = server.getClient(clientId);
+        
+        synchronized (client) {
+            client.enqueue(msg);
+            client.notify();
+        }
+    }
+    
+    static int  nextClientId() {
+        return ++BrokerConsole.brokerClientId;
     }
 }

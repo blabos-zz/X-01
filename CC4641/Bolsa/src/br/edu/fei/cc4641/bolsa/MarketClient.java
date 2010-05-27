@@ -1,31 +1,15 @@
 package br.edu.fei.cc4641.bolsa;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 
 public class MarketClient extends MarketThread {
-    private Socket clientSocket           = null;
-    private PrintWriter netOut      = null;
-    private BufferedReader netIn    = null;
+    private NetStream netStream = null;
     
-    public MarketClient(String name, Socket client) throws IOException {
+    public MarketClient(String name, Socket client, Config cfg)
+    throws IOException {
         super(name);
-        
-        clientSocket = client;
-        
-        netOut
-            = new PrintWriter(this.clientSocket.getOutputStream(), true);
-        
-        netIn
-            = new BufferedReader(
-                    new InputStreamReader(
-                            this.clientSocket.getInputStream()));
-        
-        start();
+        netStream = new NetStream(client, cfg);
     }
     
     public void stopMe() {
@@ -34,14 +18,7 @@ public class MarketClient extends MarketThread {
     }
     
     private void cleanup() {
-        if (clientSocket != null && !clientSocket.isClosed()) {
-            try {
-                clientSocket.close();
-            } catch (Exception e) {
-                stderr.println(e.getMessage());
-            }
-            clientSocket = null;
-        }
+        netStream.cleanup();
     }
 
     public void run() {
@@ -49,10 +26,10 @@ public class MarketClient extends MarketThread {
             Message msg = null;
             Message res = null;
             
-            msg = getMsg();
+            msg = netStream.readMessage();
             
             if (msg == null) {
-                netOut.close();
+                netStream = null;
                 break;
             }
             
@@ -83,24 +60,10 @@ public class MarketClient extends MarketThread {
                 stdout.println(res.toXML());
             }
             
-            netOut.println(res.toStr());
+            netStream.writeMessage(res);
         }
         
         MarketServer.cleanClient(getName());
-    }
-
-    private Message getMsg() {
-        Message msg = null;
-        
-        try {
-            msg = new Message(netIn.readLine());
-        }
-        catch (Exception e) {
-            stderr.println(e.getMessage());
-            msg = null;
-        }
-        
-        return msg;
     }
 
     private Message procGreeting(Message msg) {
