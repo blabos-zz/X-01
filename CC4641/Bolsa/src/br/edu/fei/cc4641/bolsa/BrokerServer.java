@@ -12,6 +12,7 @@ public class BrokerServer extends MarketThread {
     
     
     public BrokerServer(Config cfg) {
+        super("BrokerServer Thread");
         this.conf   = cfg;
         clients     = new HashMap<String, BrokerClient>();
     }
@@ -36,8 +37,6 @@ public class BrokerServer extends MarketThread {
                 System.err.println(e.getMessage());
             }
         }
-        
-        cleanup();
     }
     
     public void enqueueToClient(Message msg) {
@@ -60,12 +59,11 @@ public class BrokerServer extends MarketThread {
     
     public synchronized void stopMe() {
         super.stopMe();
-        cleanup();
     }
 
-    void cleanup() {
+    protected void cleanup() {
         try {
-            if (serverSocket != null && !serverSocket.isClosed()) {
+            if (serverSocket != null) {
                 serverSocket.close();
             }
             

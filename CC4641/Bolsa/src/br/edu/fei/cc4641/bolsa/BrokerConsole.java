@@ -47,24 +47,23 @@ public class BrokerConsole extends MarketThread {
     
     public void stopMe() {
         super.stopMe();
-        cleanup();
     }
     
-    private void cleanup() {
+    protected void cleanup() {
         for (BrokerServer server: servers.values()) {
             server.stopMe();
-            server.cleanup();
         }
         servers.clear();
         
         for (BrokerWorker worker: workers.values()) {
             worker.stopMe();
-            worker.cleanup();
         }
         workers.clear();
     }
     
     public void run() {
+        stdout.println("Thread '" + getName() + "' starting");
+        
         stdout.println("Broker Console");
         while(!canStop()) {
             try {
@@ -75,6 +74,8 @@ public class BrokerConsole extends MarketThread {
                 e.printStackTrace();
             }
         }
+        
+        stdout.println("Thread '" + getName() + "' ending");
     }
     
     private void prompt() {

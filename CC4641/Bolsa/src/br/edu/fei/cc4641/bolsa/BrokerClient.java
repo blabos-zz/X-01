@@ -18,12 +18,11 @@ public class BrokerClient extends MarketThread {
         messageQueue = new LinkedList<Message>();
     }
     
-    public void stopMe() {
+    public synchronized void stopMe() {
         super.stopMe();
-        cleanup();
     }
     
-    private void cleanup() {
+    protected void cleanup() {
         netStream.cleanup();
     }
     

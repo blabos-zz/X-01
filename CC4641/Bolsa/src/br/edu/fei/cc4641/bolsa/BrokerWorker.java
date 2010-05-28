@@ -21,10 +21,9 @@ public class BrokerWorker extends MarketThread {
     
     public void stopMe() {
         super.stopMe();
-        cleanup();
     }
     
-    void cleanup() {
+    protected void cleanup() {
         netStream.cleanup();
     }
     

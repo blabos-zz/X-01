@@ -42,7 +42,6 @@ class ClientAgent extends MarketThread {
 
     public void stopMe() {
         super.stopMe();
-        cleanup();
     }
     
     public void run() {
@@ -350,8 +349,8 @@ class ClientAgent extends MarketThread {
         return false;
     }
 
-    private void cleanup() {
-        netStream = null;
+    protected void cleanup() {
+        netStream.cleanup();
     }
 }
 

@@ -1,8 +1,6 @@
 package br.edu.fei.cc4641.bolsa;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
+import java.io.*;
 
 public class MarketThread extends Thread {
     private boolean stop            = false;
@@ -26,7 +24,7 @@ public class MarketThread extends Thread {
     }
     
     public void stopMe() {
-        synchronized(this) {
+        synchronized (this) {
             stop = true;
         }
         
@@ -41,7 +39,7 @@ public class MarketThread extends Thread {
         cleanup();
     }
     
-    protected void cleanup(){}
+    private void cleanup(){}
     
     private void _init() {
         stdin   = new BufferedReader(new InputStreamReader(System.in));

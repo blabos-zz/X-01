@@ -79,26 +79,6 @@ public final class NetStream {
 
     public void cleanup() {
         try {
-            if (queryIn != null) {
-                queryIn.close();
-                queryIn = null;
-            }
-            
-            if (queryOut != null) {
-                queryOut.close();
-                queryOut = null;
-            }
-            
-            if (serialIn != null) {
-                serialIn.close();
-                serialIn = null;
-            }
-            
-            if (serialOut != null) {
-                serialOut.close();
-                serialOut = null;
-            }
-            
             if (socket != null) {
                 socket.close();
                 socket = null;
