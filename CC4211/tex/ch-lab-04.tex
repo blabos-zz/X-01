@@ -1,0 +1,45 @@
+\chapter{Lab 04 - Bootsector}
+
+Quando o computador inicializa, ele começa a executar instruções eu uma área pré-determnada de memória, usualmente onde começa a BIOS. Então são feitas algumas checagens com o o POST (power-on self test) e finalmente a bios procura o setor de boot de algum dispositivo presente. Se encontrado, esse código é executado e toma controle da máquina, geralmente fazendo a carga do SO.
+
+Em PCs, o setor de boot é o primeiro setor de dados do dispositivo, tendo apenas 512 bytes de tamanho. Essa área ainda é subdividida em alguns pedaços, como a marcação de partições, assinatura do disco, entre outros, restando somente 440 bytes para código executável.
+
+Os últimos dois bytes (0x55 e 0xaa)são a assinatura da MBR.
+
+\section{Objetivos}
+
+\section{Requisitos}
+
+\section{Implementação}
+
+\begin{espacosimples}
+\begin{verbatim}
+//--------------------------------------------------------------------
+// boot.s
+.code16
+.section .text
+.globl _start
+_start:
+    mov $0xb800, %ax
+    mov %ax, %ds
+    movb $'X', 0
+    movb $0x1e, 1
+idle:
+    jmp idle
+//--------------------------------------------------------------------
+\end{verbatim}
+\end{espacosimples}
+
+\begin{espacosimples}
+\begin{verbatim}
+//--------------------------------------------------------------------
+as -o char.o char.s
+ld --oformat binary -o char char.o
+
+dd if=char of=/dev/sdb
+echo -ne "\x55\xaa" | dd seek=510 bs=1 of=/dev/sdb
+//--------------------------------------------------------------------
+\end{verbatim}
+\end{espacosimples}
+
+\section{Conclusão}

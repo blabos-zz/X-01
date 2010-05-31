@@ -1,0 +1,14 @@
+\select@language {brazil}
+\contentsline {chapter}{\numberline {1}\MakeUppercase {Lab 01 - Chamadas de Sistema (System Calls)}}{3}
+\contentsline {section}{\numberline {1.1}\mathversion {bold}\bfseries {Objetivos}}{3}
+\contentsline {section}{\numberline {1.2}\mathversion {bold}\bfseries {Exemplos de Chamadas de Sistema}}{3}
+\contentsline {subsection}{\numberline {1.2.1}getpid}{3}
+\contentsline {subsection}{\numberline {1.2.2}nanosleep}{4}
+\contentsline {subsection}{\numberline {1.2.3}kill}{5}
+\contentsline {subsection}{\numberline {1.2.4}read e write}{8}
+\contentsline {section}{\numberline {1.3}\mathversion {bold}\bfseries {Conclus\IeC {\~a}o}}{9}
+\contentsline {chapter}{\numberline {2}\MakeUppercase {Lab 02 - Minishell}}{10}
+\contentsline {section}{\numberline {2.1}\mathversion {bold}\bfseries {Objetivos}}{10}
+\contentsline {section}{\numberline {2.2}\mathversion {bold}\bfseries {Requisitos}}{10}
+\contentsline {section}{\numberline {2.3}\mathversion {bold}\bfseries {Implementa\IeC {\c c}\IeC {\~a}o}}{11}
+\contentsline {section}{\numberline {2.4}\mathversion {bold}\bfseries {Conclus\IeC {\~a}o}}{14}
