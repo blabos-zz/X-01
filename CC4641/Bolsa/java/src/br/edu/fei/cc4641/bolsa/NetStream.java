@@ -3,6 +3,15 @@ package br.edu.fei.cc4641.bolsa;
 import java.io.*;
 import java.net.*;
 
+/**
+ * Encapsula o acesso aos sockets. Este componente foi adicioando para que se
+ * pudesse chavear facilmente entre as formas de transmissão serializada e
+ * query-string.
+ * 
+ * Fornece os métodos readMessage e writeMessage para recepção e envio de
+ * mensagens, respectivamente.
+ *
+ */
 public final class NetStream {
     private Socket socket                   = null;
     private Config conf                     = null;

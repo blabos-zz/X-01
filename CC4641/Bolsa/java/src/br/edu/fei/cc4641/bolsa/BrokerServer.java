@@ -4,7 +4,20 @@ import java.io.*;
 import java.net.*;
 import java.util.HashMap;
 
-
+/**
+ * Implementa a thread servidora do broker. Cria o socket servidor pelo qual
+ * os clientes se conectam. Aceita várias conexões simultâneas. Dispara uma
+ * thread para tratar cada nova conexão.
+ * 
+ * Toda vez que os clientes enviam uma mensagem ao broker, sua thread coloca
+ * a mensagem na fila de envio do worker. Toda vez que há uma mensagem na
+ * fila local da thread, essa mensagem (que é uma resposta) é enviada ao
+ * cliente.
+ * 
+ * O worker é a thread responsável por pegar as mensagens recebidas pelo
+ * broker, enviar ao mercado e repassar a resposta para a thread cliente
+ * adequada.
+ */
 public class BrokerServer extends MarketThread {
     private ServerSocket serverSocket                       = null;
     private static HashMap<String, BrokerClient> clients    = null;

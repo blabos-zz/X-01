@@ -4,6 +4,11 @@ import java.io.*;
 import java.net.*;
 import java.util.LinkedList;
 
+/**
+ * Trata uma requisição de um cliente, basicamente colocando a mensagem do
+ * cliente na fila do worker e pegando as mensagens de resposta em sua fila
+ * local e enviando ao cliente.
+ */
 public class BrokerClient extends MarketThread {
     private Config conf                         = null;
     private NetStream netStream                 = null;

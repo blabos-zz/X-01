@@ -2,6 +2,12 @@ package br.edu.fei.cc4641.bolsa;
 
 import java.util.HashMap;
 
+/**
+ * Book básico de ofertas de papéis da bolsa. Todos os papéis que a bolsa
+ * oferece estão aqui.
+ * 
+ * É implementado como um singleton.
+ */
 @SuppressWarnings("serial")
 public class Book extends HashMap<String, Share> {
     private static Book myself = null;

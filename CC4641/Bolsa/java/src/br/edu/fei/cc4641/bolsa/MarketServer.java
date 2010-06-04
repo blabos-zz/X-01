@@ -3,6 +3,15 @@ import java.net.*;
 import java.util.HashMap;
 import java.io.*;
 
+/**
+ * Implementa o servidor da bolsa.
+ * 
+ * Suporta mais de um cliente simultaneamente. A cada nova conexão, uma nova
+ * thread é disparada para tratar a requisição do cliente.
+ * 
+ * Mantém uma lista de todos os clientes conectados e elimina-os dessa lista a
+ * medida que vão se desconectando e suas threads encerram.
+ */
 public class MarketServer extends MarketThread {
     private ServerSocket serverSocket               = null;
     static HashMap<String, MarketClient> clients    = null;

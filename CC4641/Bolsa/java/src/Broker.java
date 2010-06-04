@@ -1,5 +1,8 @@
 import br.edu.fei.cc4641.bolsa.*;
 
+/**
+ * Implementa o executável do broker
+ */
 public class Broker {
     public static void main(String[] args) {
         BrokerConsole console = BrokerConsole.instance();

@@ -6,23 +6,38 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 
 
+/**
+ * Classe principal de mensageria. Implementa o conceito de mensagem, conforme
+ * o documento messages.odt.
+ * 
+ * Possui a capacidade de se construir a partir de uam query-string encodada
+ * com os campos necessários conforme a documentação.
+ * 
+ * Fornece alguns métodos sobrecarregados por comodidade e depende de alguams
+ * classes de exceptions externas.
+ */
 @SuppressWarnings("serial")
 public class Message extends HashMap<String, String> {
     protected String name;
     
+    /**
+     * Construtor default. apenas marca o nome da mensagem como Error
+     */
     public Message() {
         setName();
     }
     
+    /**
+     * Construtor sobrecarregado. Constrpi uma mensagem a partir de uma query-
+     * string.
+     */
     public Message(String data)
     throws InvalidData, MissingRequiredField, InvalidValue {
         fromStr(data);
     }
     
     /**
-     * Returns a field value converted for convenience.
-     * @param key Field name
-     * @return Field value as double
+     * Retorna um campo como double por conveniência.
      */
     public double asDouble(String key) {
         double ret = 0.0;
@@ -38,9 +53,7 @@ public class Message extends HashMap<String, String> {
     }
     
     /**
-     * Returns a field value converted for convenience.
-     * @param key Field name
-     * @return Field value as integer
+     * Retorna um campo como int por conveniência.
      */
     public int asInt(String key) {
         int ret = 0;
@@ -56,9 +69,7 @@ public class Message extends HashMap<String, String> {
     }
     
     /**
-     * Returns a field value converted for convenience.
-     * @param key Field name
-     * @return Field name as String
+     * Retorna um campo como String por conveniência.
      */
     public String asString(String key) {
         String value = get(key);
@@ -67,20 +78,14 @@ public class Message extends HashMap<String, String> {
     }
     
     /**
-     * Accepts a double as value.
-     * @param key Field name
-     * @param value Field value
-     * @return Last value of field
+     * Atribui/cria um cmapo a partir de um double.
      */
     public String put(String key, double value) {
         return put(key, "" + value);
     }
     
     /**
-     * Accepts a integer as value.
-     * @param key Field name
-     * @param value Field value
-     * @return Last value of field
+     * Atribui/cria um campo a partir de um int.
      */
     public String put(String key, int value) {
         return put(key, "" + value);
@@ -88,10 +93,7 @@ public class Message extends HashMap<String, String> {
     
     
     /**
-     * Builds a message from a UTF-8 query string.
-     * @param data Query string
-     * @throws InvalidData When cannot decode values
-     * @throws InvalidValue When a invalid value is found
+     * Constroi uma mensagem a aprtir de uma query-string em UTF-8.
      */
     public void fromStr(String data)
     throws InvalidData, InvalidValue {
@@ -118,8 +120,7 @@ public class Message extends HashMap<String, String> {
     }
     
     /**
-     * Converts a message to a query string.
-     * @return Query string
+     * Converte uma mensagem para query-string em UTF-8.
      */
     public String toStr() {
         String ret = "";
@@ -142,8 +143,8 @@ public class Message extends HashMap<String, String> {
     }
     
     /**
-     * Converts a message to a XML-like string (for display purposes).
-     * @return XML like string
+     * Converte uma mensagem para um texto em formato semelhante a XML, apenas
+     * para depuração.
      */
     public String toXML() {
         String ret = "";
@@ -167,6 +168,10 @@ public class Message extends HashMap<String, String> {
         return ret;
     }
     
+    
+    /**
+     * Checa se a mensagem possui os campos básicos.
+     */
     public void checkHeader() throws InvalidMessage {
         if (get("clientId") == null) {
             throw new InvalidMessage(
@@ -179,6 +184,9 @@ public class Message extends HashMap<String, String> {
         }
     }
     
+    /**
+     * Checa se é uma mensagem de compra válida.
+     */
     public void checkBuy() throws InvalidMessage {
         checkHeader();
         
@@ -207,6 +215,9 @@ public class Message extends HashMap<String, String> {
         }
     }
     
+    /**
+     * Checa se é uma mensagem de venda válida.
+     */
     public void checkSell() throws InvalidMessage {
         checkHeader();
         
@@ -235,6 +246,9 @@ public class Message extends HashMap<String, String> {
         }
     }
     
+    /**
+     * Checa se é uma mensagem de aceitação válida.
+     */
     public void checkAccept() throws InvalidMessage {
         checkHeader();
         
@@ -282,6 +296,9 @@ public class Message extends HashMap<String, String> {
         }
     }
     
+    /**
+     * Checa se é uma mensagem de rejeição válida.
+     */
     public void checkReject() throws InvalidMessage {
         checkHeader();
         
@@ -305,6 +322,9 @@ public class Message extends HashMap<String, String> {
         }
     }
     
+    /**
+     * Checa se é uma mensagem de requisição de informações do mercado válida.
+     */
     public void ckeckInfoRequest() throws InvalidMessage {
         checkHeader();
         
@@ -317,7 +337,10 @@ public class Message extends HashMap<String, String> {
             }
         }
     }
-        
+    
+    /**
+     * Checa se é uma mensagem de informações do mercado válida.
+     */
     public void ckeckInfoResponse() throws InvalidMessage {
         checkHeader();
         
@@ -336,8 +359,10 @@ public class Message extends HashMap<String, String> {
         }
     }
     
+    /**
+     * Checa se é uma mensagem de cumprimento válida.
+     */
     public void ckeckGreeting() throws InvalidMessage {
-        //checkHeader();
         
         {
             int oper = asInt("operation");
@@ -354,6 +379,9 @@ public class Message extends HashMap<String, String> {
         }
     }
     
+    /**
+     * Checa se é uma mensagem de erro válida.
+     */
     public void ckeckError() throws InvalidMessage {
         checkHeader();
         
@@ -372,6 +400,9 @@ public class Message extends HashMap<String, String> {
         }
     }
     
+    /**
+     * Atribui o nome da mensagem conforme a operação corrente.
+     */
     private void setName() {
         try {
             name = Operation.names[asInt("operation")];

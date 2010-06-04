@@ -4,6 +4,10 @@ import java.io.*;
 import java.net.*;
 import java.util.LinkedList;
 
+/**
+ * Pega as mensagens do broker, envia ao mercado, recebe a resposta e entrega
+ * ao cliente adequado.
+ */
 public class BrokerWorker extends MarketThread {
     public static final int MAX_RETRIES         = 3;
     private Config conf                         = null;
