@@ -1,18 +1,230 @@
 \chapter{Lab 03 - Interpretador de Comandos}
 
+Um interpretador de programas é uma camada de interface com o usuário que roda acima ou dentro de um shell, oferecendo algumas facilidades que um shell cru não não entrega.
+
+Geralmente, shell e interpretador de comandos são o mesmo programa, que além de fornecer acesso a programas externos, também possui algums comandos inernos, chamados de \emph{built-in}.
+
 \section{Objetivos}
+
+Neste laboratóorio vamos mostrar como criar um mini interpretador de comandos utilizando algumas das funções da biblioteca C padrão.
+
+Note que a complexidade aumentaria em muito se usássemos somente as chamadas de sistema assim como no laboratório anterior.
 
 \section{Requisitos}
 
+Nosso mini interpretador de comandos deverá ser capaz de interpretar uma lista de comandos definida previamente, repassando as chamadas para os programas disponíveis no sistema operacional e implementando alguns comandos internos.
+
+A lista de comandos aceitas deve conter:
+
+\begin{itemize}
+\item \textbf{indice}: Mostra o conteúdo do diretório corrente (ls);
+\item \textbf{local}: Mostra qual é o diretório corrente (pwd);
+\item \textbf{mostra}: Mostra o conteúdo de um arquivo (cat);
+\item \textbf{escreve}: Cria e/ou edita um arquivo (nano);
+\item \textbf{muda}: Muda o diretório corrente (cd);
+\item \textbf{ajuda}: Mostra a lista de comandos disponíveis;
+\end{itemize}
+
 \section{Implementação}
+
+O código do mini interpretador de comandos é dividido em várias partes, implementadas como funções em linguagem C. O seu loop principal chama algumas dessas funções conforme descreveremos a seguir.
+
+Dentro da função main ocorre o loop principal do programa. Esse loop repete a sequência de chamadas de função, até que o usuário digite Ctrl+D para encerrar. Essa sequência consiste em mostrar o prompt (\%), ler um comando e seus parâmetros diretamente do teclado com a função \texttt{read\_{}cmd()}, executar o comando com \texttt{execute()} e fazer a limpeza que for necessária com \texttt{cleanup()}.
+
+A função \texttt{read\_{}cmd()} lê a entrada do teclado, coloca-a em um buffer e em seguida processa esse buffer para extrair o comando, os parâmetros e então gerar um array conforme a função \texttt{execv()} exige. Para isso ela utiliza alocação dinâmica de memória com \texttt{realloc()}, implicando na necessidade de se chamar \texttt{cleanup()} para liberar essa memória com \texttt{free()} após a execução do comando.
+
+A função \texttt{execute()}, através da função \texttt{real\_{}cmd()} faz o mapeamento entre os comandos suportados e os comandos reais no sistema. Em seguida ela verifica se o comando digitado é um comando interno ou se é uma chamada a um programa do SO. Caso seja um comando interno ela mesma executa subrotinas que realizam a tarefa, senão ela usa \texttt{fork()}, \texttt{excev()} e \texttt{waitpid()} para executar o rograma externo.
+
+No final do loop é chamada a função \texttt{cleanup()} para liberar a memória dinamicamente alocada, se for o caso.
+
+Confira o código completo logo abixo: 
 
 \newpage
 \begin{espacosimples}
 \begin{verbatim}
 //--------------------------------------------------------------------
 // command.c
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+
+#define MAXLINE 1024
+
+char* my_commands[] = {
+    "/bin/ls",
+    "/bin/pwd",
+    "/bin/cat",
+    "/bin/nano",
+    "muda",
+    "ajuda"
+};
+
+char* my_index[] = {
+    "indice",
+    "local",
+    "mostra",
+    "escreve",
+    "muda",
+    "ajuda"
+};
+
+const int num_cmd = sizeof(my_commands) / sizeof(char*);
+
+void prompt() {
+    fprintf(stdout, "%% ");
+}
+
+char* real_cmd(char* fake) {
+    int i;
+    
+    if (fake) {
+        for (i = 0; i < num_cmd; i++) {
+            if (!strcmp(fake, my_index[i])) {
+                return my_commands[i];
+            }
+        }
+    }
+    
+    return NULL;
+}
+\end{verbatim}
+\end{espacosimples}
+
+\newpage
+\begin{espacosimples}
+\begin{verbatim}
+void read_cmd(char*** cmd, int* len) {
+    char buffer[MAXLINE];
+    char* token = NULL;
+    int token_len = 0;
+    
+    if (fgets(buffer, MAXLINE, stdin) != NULL) {
+        buffer[strlen(buffer) - 1] = 0;
+        *len = 0;
+        *cmd = 0;
+        token = strtok(buffer, " ");
+        while (token) {
+            (*len)++;
+            token_len = strlen(token);
+            
+            (*cmd) = (char**)realloc((*cmd), (*len) * sizeof(char*));
+            (*cmd)[(*len) - 1] = (char*)malloc((token_len + 1) * sizeof(char));
+            strncpy(((*cmd)[(*len) - 1]), token, (token_len + 1));
+            
+            token = strtok(NULL, " ");
+        }
+        
+        (*cmd) = (char**)realloc((*cmd), ((*len) + 1) * sizeof(char*));
+        (*cmd)[(*len)] = (char*)malloc(sizeof(char));
+        ((*cmd)[(*len)]) = NULL;
+    }
+    else *len = -1;
+}
+
+void cleanup(char*** cmd, int len) {
+    int i;
+    
+    if (*cmd) {
+        for (i = 0; i <= len; i++) free((*cmd)[i]);
+        
+        free((*cmd));
+        (*cmd) = NULL;
+    }
+}
+
+void muda(char** argv, int len) {
+    char destdir[MAXLINE];
+    
+    if (len <= 1) strncpy(destdir, ".", 2);
+    else strncpy(destdir, argv[1], MAXLINE);
+    
+    if (chdir(destdir)) printf("Cannot change\n");
+}
+\end{verbatim}
+\end{espacosimples}
+
+\newpage
+\begin{espacosimples}
+\begin{verbatim}
+void ajuda() {
+    int i;
+    
+    for (i = 0; i < num_cmd; i++) printf("%s\n", my_index[i]);
+}
+
+int execute(char** argv, int len) {
+    pid_t pid;
+    int status;
+    
+    if (len > 0) {
+        char* command = real_cmd(argv[0]);
+        
+        if (!command) {
+            fprintf(stdout, "Comando inválido\n");
+            return 1;
+        }
+        
+        if (strcmp(command, "muda") == 0) {
+            muda(argv, len);
+            return 1;
+        }
+        
+        if (strcmp(command, "ajuda") == 0) {
+            ajuda();
+            return 1;
+        }
+        
+        if ((pid = fork()) < 0){
+            fprintf(stderr, "fork error\n");
+        }
+        else if (pid == 0) {
+            char* command = real_cmd(argv[0]);
+            execv(command, argv);
+            
+            fprintf(stderr, "couldn't execute: %s\n", argv[0]);
+        }
+        
+        if ((pid = waitpid(pid, &status, 0)) < 0){
+            fprintf(stderr, "waitpid error\n");
+        }
+        else {
+            return 1;
+        }
+    }
+    
+    return 0;
+}
+\end{verbatim}
+\end{espacosimples}
+
+\newpage
+\begin{espacosimples}
+\begin{verbatim}
+int main(int argc, char** argv) {
+    char** cmd = NULL;
+    int len = 0;
+    int repeat = 1;
+    
+    while (repeat) {
+        prompt();
+        read_cmd(&cmd, &len);
+        repeat = execute(cmd, len);
+        cleanup(&cmd, len);
+    }
+    
+    fprintf(stdout, "\n");
+    
+    return EXIT_SUCCESS;
+}
 //--------------------------------------------------------------------
 \end{verbatim}
 \end{espacosimples}
 
 \section{Conclusão}
+
+Combinando chamadas de sistema e funções da biblioteca C padrão podemos criar aplicações cada vez mais sofisticadas, de forma a facilitar o uso do sistema operacional por parte dos usuários.
+
+Após este laboratório o aluno deverá ser capaz de entender melhor o funcionamento de um interpretador de comandos, bem como ser capaz de combinar os diversos recursos de programação fornecidos pelo SO para implementar aplicações cada vez mais sofisticadas.

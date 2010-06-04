@@ -13,7 +13,7 @@ char* my_commands[] = {
     "/bin/cat",
     "/bin/nano",
     "muda",
-    "help"
+    "ajuda"
 };
 
 char* my_index[] = {
@@ -22,7 +22,7 @@ char* my_index[] = {
     "mostra",
     "escreve",
     "muda",
-    "help"
+    "ajuda"
 };
 
 const int num_cmd = sizeof(my_commands) / sizeof(char*);

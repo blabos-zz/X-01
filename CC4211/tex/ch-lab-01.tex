@@ -2,7 +2,7 @@
 
 As Chamadas de Sistema são o conjunto de funções que compõe a interface entre o sistema operacional e os programas de usuário. Elas permitem o acesso a recursos e dispositivos da máquina através de uma API padronizada, de forma que o programador não precise se preocupar com detalhes do hardware.
 
-Essa API permite acesso aos recursos internos do SO, de forma que se por um lado ela é essencial para o desenvolvimento de aplicações de baixo nível, por outro seu uso indevido pode ser potencialmente danoso ao sistema inteiro.
+Essa API permite acesso aos recursos internos do SO, de forma que se por um lado ela é essencial para o desenvolvimento de aplicações de baixo nível, por outro seu uso indevido pode ser potencialmente danoso ao sistema inteiro \cite{Mitchell}
 
 \section{Objetivos}
 
@@ -18,7 +18,7 @@ Utilizaremos para isso alguns exemplos de códigos escritos em linguagem C.
 pid_t getpid(void);
 \end{verbatim}
 
-A chamada getpid retorna o id do processo corrente (pid - process ID). Um pid é uma estrutura de dados arbitrária que alguns sistemas operacionais utilizam para identificar unicamente um processo. No Unix o pid é um número inteiro sem sinal.
+A chamada getpid retorna o id do processo corrente (pid - process ID)\cite{Man}. Um pid é uma estrutura de dados arbitrária que alguns sistemas operacionais utilizam para identificar unicamente um processo. No Unix o pid é um número inteiro sem sinal.
 
 Para obtermos o pid do processo atual utilizando linguagem C podemos compilar e executar o código abaixo:
 
@@ -61,7 +61,7 @@ Note que a cada execução, o pid muda. Isso acontece porque a cada nova execuç
 int nanosleep(const struct timespec *req, struct timespec *rem);
 \end{verbatim}
 
-A chamada nanosleep suspende a execução da thread atual até que se passe o tempo indicado pelos parâmetros. A thread literalmente dorme por um período determinado. Vamos ao código:
+A chamada nanosleep suspende a execução da thread atual até que se passe o tempo indicado pelos parâmetros\cite{Man}. A thread literalmente dorme por um período determinado. Vamos ao código:
 
 \newpage
 
@@ -109,7 +109,7 @@ A chamada nanosleep é utilizada para a criação de timers de alta resolução 
 int kill(pid_t pid, int sig);
 \end{verbatim}
 
-A chamada kill é utilizada para enviar sinais a qualquer processo. Um sinal é uma forma de comunicação entre o kernel e os processos e entre processos, uma ``espécie de mensagem''. Dentre esses sinais estão comandos para que o processo espere, continue a sua execução ou termine, por exemplo.
+A chamada kill é utilizada para enviar sinais a qualquer processo\cite{Man}. Um sinal é uma forma de comunicação entre o kernel e os processos e entre processos, uma ``espécie de mensagem''. Dentre esses sinais estão comandos para que o processo espere, continue a sua execução ou termine, por exemplo.
 
 Neste exercício vamos utilizar as chamadas anteriores para um processo que executa um laço infinito e então vamos criar um programa que força a finalização do outro processo com uma chamada kill.
 
