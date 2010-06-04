@@ -1,0 +1,116 @@
+\chapter{Lab 04 - Bootsector}
+
+Quando o computador inicializa, ele começa a executar instruções eu uma área pré-determnada de memória, usualmente onde começa a BIOS. Então são feitas algumas checagens como o POST (power-on self test) e finalmente a bios procura o setor de boot de algum dispositivo presente. Se encontrado, esse código é executado e toma controle da máquina, geralmente fazendo a carga do SO.
+
+Em PCs, o setor de boot é o primeiro setor de dados do dispositivo, tendo apenas 512 bytes de tamanho. Essa área ainda é subdividida em alguns pedaços, como a marcação de partições, assinatura do disco, entre outros, restando somente 440 bytes para código executável.
+
+Os últimos dois bytes (0x55 e 0xaa)são a assinatura da MBR\cite{Susam}.
+
+\section{Objetivos}
+
+O objetivo deste laboratório é mostrar como criar um código em linguagem assembly capaz de tornar um dispositivo de aramzenamento (tipicamente discos rígidos, disquetes e pendrives) inicializável.
+
+Uma abordagem semelhante pode ser aplicada no desenvolvimento de carregadores de sistemas operacionais (bootloaders).
+
+\section{Requisitos}
+
+Os códigos apresentados aqui estão em linguagem assembly compatível com a arquitetura Intel x86, no entanto familiaridade com a linguagem não é mandatória, embora facilite o entendimento do exemplo.
+
+Precisamos também de um pendrive comum com pelo menos 512 bytes de capacidade total de armazenamento e um computador capaz de ser inicializado através de alguma de suas portas USB.
+
+Este exercício foi desenvolvido e testado utilizando Ubuntu 10.04. Vamos precisar dos programas as, ld (do pacote binutils) e dd (do pacote coreutils).
+
+\section{Implementação}
+
+A implementação consiste em dois passos. O primeiro é a compilação do código de boot em assembly e o segundo é a instalação do executável no pendrive.
+
+Vamos ao código de boot:
+
+\begin{espacosimples}
+\begin{verbatim}
+##--------------------------------------------------------------------
+## boot.s
+.code16
+.section .text
+.globl _start
+_start:
+    mov $0xb800, %ax
+    mov %ax, %ds
+    movb $'X', 0
+    movb $0x1e, 1
+idle:
+    jmp idle
+##--------------------------------------------------------------------
+\end{verbatim}
+\end{espacosimples}
+
+O comando \texttt{.code16 } instrui o assembler (as) a trabalhar em modo 16 bits. A linha \texttt{.section .text } declara a seção de texto, ou seção de código. A linha \texttt{.globl \_{}start } declara o símbolo \texttt{\_{}start }, que é o ponto de entrada do programa. As linhas logo abaixo \emph{definem} o símbolo \texttt{\_{}start } e as intruções a serem executadas.
+
+As instruções \texttt{mov \$0xb800, \%ax } e \texttt{mov \%ax, \%ds } carregam para o registrador de segmento o valor 0xb800, que é um dos endereços onde a memória de vídeo é mapeada, significando que a partir desse ponto, cada endereço relativo de memória revere-se a esse segmento.
+
+Em seguida escrevemos um caractere na memória, que é automaticamente repassado para o vídeo.
+
+Nesse modo de vídeo, cada caracter na tela é representado por dois bytes, sendo o primeiro o dado e o segundo os atributos desse caracter na tela (corese de frente e fundo). Assim as duas linhas seguintes \texttt{movb \$'X', 0 } e \texttt{movb \$0x1e, 1 } carregam para a primeira e seguda posição da memória de vídeo o caracter X com oa atributos cor de fundo azul e cor de frente amarelo, respectivamente.
+
+A linha seguinte faz o programa entrar em um laço infinito.
+
+Salve o cóodigo acima em um arquivo chamado boot.s e gere o executável com os comandos:
+
+\begin{espacosimples}
+\begin{verbatim}
+as -o boot.o boot.s
+ld --oformat binary -o boot.com boot.o
+\end{verbatim}
+\end{espacosimples}
+
+Em seguida, vamos testar o executável. Para isso podemos utilizar o emulador DOSEMU. Instale-o se precisar e simplesmente execute o comando:
+
+\begin{espacosimples}
+\begin{verbatim}
+dosemu boot.com
+\end{verbatim}
+\end{espacosimples}
+
+Se tudo deu certo no canto superior esquerdo da tela do dosemu, deve aparecer o  caracter X com fundo azul e frente amarelo. Aproveite para testar outros caracteres e cores.
+
+Agora vamos à parte mais crítica do projeto que a a gravação do executável no pendrive. Preste bastante atenção e vá com bastante cuidado, pois um erro neste passo pode destruir os dados no HD do seu computador.
+
+Primeiro vamos descobrir para qual device o SO mapeia o pendrive. Para isso, insira o pendrive no computador e espere ele ser detectado. Agora execute o comando df para mostrar todos os filesystems montados:
+
+\begin{espacosimples}
+\begin{verbatim}
+df
+Filesystem           1K-blocks      Used Available Use% Mounted on
+/dev/sda1              3876364   2807484    871968  77% /
+none                    504748       300    504448   1% /dev
+none                    508968       184    508784   1% /dev/shm
+none                    508968        88    508880   1% /var/run
+none                    508968         0    508968   0% /var/lock
+none                    508968         0    508968   0% /lib/init/rw
+/dev/sdc1              1959376    847196   1012648  46% /home
+/dev/sdd1              7800336   1418892   6381444  19% /media/D400-841A
+\end{verbatim}
+\end{espacosimples}
+
+O pendrive foi detectado e associado ao device /dev/sdd (/dev/sdd é o pendrive e /dev/sdd1 é a partição montada).
+
+Vamos então copiar o executável de boot com os comandos abaixo. Note que você precisará de permissão de administrador para acessar o dispositivo.
+
+\textbf{Lembrando: um erro aqui e você pode destruir os dados no dispositivo errado.}
+
+\begin{espacosimples}
+\begin{verbatim}
+dd if=boot.com of=/dev/sdd
+echo -ne "\x55\xaa" | dd seek=510 bs=1 of=/dev/sdd
+\end{verbatim}
+\end{espacosimples}
+
+O primeiro comando copia o executável boot.com, de apenas 17 bytes de tamanho, para  o início do pendrive. O segundo comando grava a assinatura da MBR nas posições 510 e 511 do pendrive, finalizando o setor de boot.
+
+Agora é só dar boot por esse pendrive e ver o caracter aparecendo na tela.
+
+\section{Conclusão}
+
+Quando o sistema operacional ainda não está carregado não temos disponíveis syscalls ou biliotecas. Entretanto, ainda assim, utilizando diretamente linguagem assembly podemos criar programas para acessar e controlar os dispositivos.
+
+Essas técnicas são utilizadas por exemplo para criar os programas que carregam o SO ou ainda na criação de programas que rodam em dispositivos que não possuem ou não podem ter um sistema operacional.
