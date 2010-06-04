@@ -1,0 +1,6 @@
+Message
+MissingRequiredField
+InvalidValue
+InvalidMessage
+InvalidData
+MarketInfo

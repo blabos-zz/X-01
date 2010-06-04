@@ -5,6 +5,9 @@ import java.util.HashMap;
 
 import br.edu.fei.cc4641.bolsa.*;
 
+/**
+ * Implementa o executável cliente
+ */
 public class Client {
     public static void main(String[] args) {
         String host = "localhost";

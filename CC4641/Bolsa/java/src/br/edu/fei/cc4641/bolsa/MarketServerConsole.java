@@ -3,6 +3,10 @@ package br.edu.fei.cc4641.bolsa;
 import java.io.IOException;
 import java.util.HashMap;
 
+/**
+ * Implementa o console que é utilizado para passar comandos para o servidor
+ * como um singleton.
+ */
 public class MarketServerConsole extends MarketThread {
     private static MarketServerConsole myself       = null;
     private HashMap<String, MarketServer> servers   = null;

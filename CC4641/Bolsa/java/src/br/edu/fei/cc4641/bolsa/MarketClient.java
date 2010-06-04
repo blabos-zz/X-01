@@ -3,6 +3,10 @@ package br.edu.fei.cc4641.bolsa;
 import java.io.IOException;
 import java.net.Socket;
 
+/**
+ * Implementa a thread que atende a uma requisição de um cliente, segundo
+ * regras arbitrárias.
+ */
 public class MarketClient extends MarketThread {
     private NetStream netStream = null;
     

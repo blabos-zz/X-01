@@ -2,6 +2,9 @@ package br.edu.fei.cc4641.bolsa;
 
 import java.util.HashMap;
 
+/**
+ * Classe para decodificar market data info
+ */
 public class MarketInfo {
     public HashMap<String, Share> data;
     

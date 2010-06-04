@@ -1,5 +1,13 @@
 package br.edu.fei.cc4641.bolsa;
 
+/**
+ * Fornece as constantes que representam as operações de negociação na bolsa,
+ * conforme consta no documento messages.odt em anexo.
+ * 
+ * Por comodidade fornece também um método estático para converter o valor
+ * numérico da operação em uma string, geralmente utilizada nas mensagens ao
+ * usuário.
+ */
 abstract public class Operation {
     public static final int ERROR           = 0;
     public static final int BUY             = 1;

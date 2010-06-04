@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
 
+/**
+ * Implementa o console de comandos do broker como um singleton.
+ */
 public class BrokerConsole extends MarketThread {
     private static BrokerConsole myself             = null;
     private HashMap<String, BrokerServer> servers   = null;

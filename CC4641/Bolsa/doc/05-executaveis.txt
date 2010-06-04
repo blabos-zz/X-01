@@ -1,0 +1,23 @@
+Client
+
+Implementa um cliente que pode se conectar em um broker ou diretamente na
+bolsa. Suporta os protocolos query-string e serializado.
+
+Fornece um menu em modo texto com as opções disponíveis.
+
+Atualiza a carteira automaticamente se necessário.
+
+
+Broker
+
+Implementa o executável do Broker. Inicializa o console e dispara uma
+instância para cada protocolo.
+
+
+Market
+
+Implementa o executável da bolsa. Inicializa o console e dispara uma instância
+do servidor para cada protocolo.
+
+Embora hajam duas threads servidoras o book é único e compartilhado entre as
+duas instâncias da bolsa.

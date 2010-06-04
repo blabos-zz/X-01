@@ -1,5 +1,10 @@
 package br.edu.fei.cc4641.bolsa;
 
+
+/**
+ * Encapsula alguams configurações que são melhor exploradas pelo mecanismo de
+ * protocolos.
+ */
 public class Config {
     private int protocol        = Protocol.PROTO_QUERYSTRING;
     private String serverHost   = "localhost";
