@@ -1,7 +1,0 @@
-Estrutura de Dados - CC3651 - Exercício de laboratório #1
-
-
-As funções de busca retornam o primeiro nome/lugar encontrado, mas
-não necessariamente o primeiro na ordem, pois a busca é binária.
-
-Todos os contatos, depois de inseridos, são mantidos em ordem alfabética.

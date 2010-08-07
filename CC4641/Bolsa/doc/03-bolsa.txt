@@ -1,4 +1,0 @@
-Book
-MarketServerConsole
-MarketClient
-MarketServer
