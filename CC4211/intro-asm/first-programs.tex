@@ -1,0 +1,113 @@
+\chapter{Primeiros programas}
+
+Neste caítulo nós vamos aprender a escrever programas em Assembly utilizando o Linux, bem como a estrutura desses programas e algumas instruções em Assembly.
+
+\section{Escrevendo e executando um programa em Assembly}
+
+Para começar vamos considerar o código abaixo:
+
+\begin{espacosimples}
+\lstinputlisting[language={[x86masm]Assembler}, caption={Primeiro programa em Assembly}]{src/ch03-01.s}
+\end{espacosimples}
+
+Com um editor de textos, salve esse código exatamente como está em um arquivo chamado exit.s (*.s, *.S ou *.asm são extensões comuns para códigos em Assembly). Não se preocupe com o código, nesta primeira etapa vamos falar como escrever e rodar o programa, depois explicaremos como ele funciona.
+
+Esse arquivo que você acabou de criar, é o código fonte. ele precisa ser montado (assembled) e link-editado \footnote{É bastante comum em jargão técnico o aportugesamento o verbo inglês link para linkar, criando expressões como linkagem, linkar, linkado, etc. Vamos utilizar essas expressões a partir daqui.} (linked) para que ele possa ser transformado em um programa.
+
+O primeiro passo é montar o código. Isso significa traduzir o que você escreveu para linguagem de máquina. Para fazer isso, abra um terminal, vá ao diretório onde slavou o arquivo exit.s e execute:
+
+\begin{espacosimples}
+\begin{verbatim}
+user@host:~ as exit.s -o exit.o
+\end{verbatim}
+\end{espacosimples}
+
+O as é o assembler. Como resultado, deve ser gerado um arquivo chamado exit.o no diretório local. Esse arquivo é chamado de \emph{código objeto}. Um arquivo de código objeto possui código em linguagem de máquina mas ainda não é executável. Em projetos grandes é comum existirem vários arquivos de código objeto. Para transformá-los em um programa o linker precisa juntá-los e adicionar informações necessárias para o kernel entender como executá-lo.
+
+Para linkar o código objeto execute o seguinte comando:
+
+\begin{espacosimples}
+\begin{verbatim}
+user@host:~ ld exit.o -o exit
+\end{verbatim}
+\end{espacosimples}
+
+ld é o linker. Ele toma os arquivos de código objeto, realiza a linkagem e gera um programa executável.
+
+\textbf{Toda vez que o código fonte for alterado você precisa repetir a montagem e a linkagem.}
+
+Para executar o programa que acabamos de criar, execute o seguinte comando:
+
+\begin{espacosimples}
+\begin{verbatim}
+user@host:~ ./exit
+\end{verbatim}
+\end{espacosimples}
+
+O ./ diz ao linux para procurar o programa exit no diretório corrente (.). Todos os programas precisam do seu caminho completo para serem executados. A razão de não precisarmos fazer isso com os comandos as e ld é porque eles estão localizados em diretórios especiais, que são listados em variáveis de ambiente especiais que não abordaremos aqui. Note que se você tentar executar o programa exit sem o ./ no início, você vai na verdade executar o programa exit do sistema operacional, então preste atenção!
+
+Você notará que nada acontece ao executar ./exit. Isso é porque o programa não faz nada mesmo, só retorna o controle para o sistema opracional. Entretanto execute o comando abaixo imediatamente após executar ./exit:
+
+\begin{espacosimples}
+\begin{verbatim}
+user@host:~ echo $?
+\end{verbatim}
+\end{espacosimples}
+
+Ele deverá responder 0. O que aconteceu foi que cada programa quando termina, retorna para o Linux um código de status. Em Unix, quando um programa executa corretamente ele retorna 0 ao sistema operacional, enquanto se houve algum erro ele retorna algo diferente de 0. Qual valor é retornado e qual o seu significado, fica a cargo do progrmador. O comando que você acabou de executar (\texttt{echo \$?}) mostra o resultado devolvido pelo último programa executado.
+
+\section{Entendendo um programa em Assembly}
+
+Consideremos o programa que acabamos de criar. Todo o texto após os caracteres \# são comentários. Isso significa que o assembler vai ignorá-lo. Vamos analisar os comandos linha a linha:
+
+\begin{espacosimples}
+\begin{verbatim}
+.section .data
+\end{verbatim}
+\end{espacosimples}
+
+Tudo que começa com um ponto não é traduzido automaticamente. Ao invés disso esse instrução é montada também. Elas são chamadas de \emph{diretivas} ou \emph{pseudo-operações}. O comando .section por exemplo, quebra o programa em seções.
+
+.section .data inicia a seção de dados do programa. Esta seção é a área utilizada para armazenamento de dados dentro do executável. É aqui que as variáveis estáticas do C ficam. O nosso programa não utiliza esse seção mas ela está aí apenas para deixar o exemplo completo.
+
+Depois temos:
+
+\begin{espacosimples}
+\begin{verbatim}
+.section .text
+\end{verbatim}
+\end{espacosimples}
+
+Esta linha inicia a seção de texto. É nessa seção que as instruções do program ficam.
+
+Em seguida:
+
+\begin{espacosimples}
+\begin{verbatim}
+.globl _start
+\end{verbatim}
+\end{espacosimples}
+
+Este comando é utilizado para dizer ao assembler para criar um símbolo chamado \_{}start. Símblos são nomes dados a trechos de código ou dados e são utilizados para referenciar esse código ou dado. Sem os símbolos você precisaria referenciar cada trecho de código ou dado pelo seu endereço numérico. Assim a cada vez que o program precisasse receber uma nova instrução, seria preciso alterar os endereços de todo o resto. Lembre-se que quando um programa é carregado na memória, cada instrução também tem um endereço.
+
+O .glob diz ao assembler que \_{}start é um símbolo global que será necessário para o linker. \_{}start é um símblo especial que sempre precisará ser marcado com .glob, pois ele é o ponto de início do programa. Sem isso o computador vai carregar o programa mas não vai saber por onde começar a executá-lo.
+
+A próxima linha
+
+\begin{espacosimples}
+\begin{verbatim}
+_start:
+\end{verbatim}
+\end{espacosimples}
+
+\emph{define} o valor de uma label. Uma label é um símbolo seguido de dois pontos (:). Quando o assemlber monta o código fonte, ele asscioa cada dado ou instrução a um endereço. As labels dizem ao assembler que o valor do símbolo deve ser o endereço da primeira instrução ou dado logo depois dela. Assim, se alguma instrução ou dado mudar de lugar, você não precisa reescrever todo o código!
+
+Agora vamos finalmente às instruções do programa:
+
+\begin{espacosimples}
+\begin{verbatim}
+movl $1, %eax
+\end{verbatim}
+\end{espacosimples}
+
+Quando o programa for executado, esta instrução coloca o valor 1 no registrador \%{}eax

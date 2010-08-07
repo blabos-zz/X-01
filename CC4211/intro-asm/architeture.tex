@@ -1,0 +1,121 @@
+\chapter{Arquitetura Básica de Computadores}
+
+Antes de aprender como programar, você precisa primeiro entender como um computador interpreta programas. Você não precisa ter um diploma em Engenharia Elétrica, mas você precisa enteder o básico.
+
+Os computadores modernos são baseados na arquitetura chamada de \href{http://en.wikipedia.org/wiki/Von_Neumann_architecture}{Von Neuman}, nome de seu criador. A arquitetura Von Neuman divide o computador em duas partes principais, a CPU (Unidade Central de Processamento) e a memória. Essa arquitetura é usada em todos os computadores modernos, inclusive em PCs, supercomputadores, mainframes e ainda em celulares \cite{Bartlett}.
+
+\section{Estrutura da memória}
+
+Para facilitar o entendimento da estrutura da memória, imagine que você tem um armário com várias gavetas do mesmo tamanho e cada uma delas é numerada \footnote{O autor utiliza o exemplo de caixas postais no correio, mas eu achei que o meu exemplo seria mais ilustrativo.}.
+
+A memória do computador é organizada de forma análoga. A principal diferença é que nas gavetas você pode armazenar qualquer coisa, mas na memória somente um único número por vez. A razão disso é que é mais fácil e barato implementar assim.
+
+A memória do computador é utilizada para os mais diversos fins. Tudo que é calculado é armazenado na memória, aliás, tudo que é ``armazenado'', é guardado na memória. Por exemplo:
+
+\begin{itemize}
+\item A posição do cursor na tela
+\item O tamanho de cada janela
+\item As imagens de cada ícone
+\item E por ai vai \ldots
+\end{itemize}
+
+Adicionalmente, a arquitetura define que não somente dados são armazenados na memória, mas os programas que são executados pelo computador também. Em computação, não há diferença entre programas e dados, exceto como eles são usados pelo computador. Ambos são armazenados na memória e acessados do mesmo jeito.
+
+\section{A CPU}
+
+Só armazenar dados não é muito útil. Além disso é preciso acessá-los, manipulá-los, movê-los, etc. Esse é o trabalho da CPU.
+
+A CPU lê as instruções da memória uma de cada vez e as executa. Isto é conhecido com ciclo \emph{fetch-execute} (obter e executar). Para isso a CPU conta com os seguintes componentes:
+
+\begin{description}
+
+\item[Contador de Programa] é um registrador que aponta para o endereço onde está a próxima instrução a ser executada.
+
+\item[Decodificador de Instrução] é o responsável por identificar a instrução e os dados que ela utiliza.
+
+\item[Barramento de Dados] é a ligação entre a memória e a CPU, utilizada para obter os dados necessários para executar a instrução.
+
+\item[Registradores de propósito geral] são aŕeas de memória ultra-rápidas que existem dentro do processador. Na verdade o processador só pode executar instruções que estejam carregadas nos registradores.
+
+\item[Unidade Lógica e Aritmética] é o componente que finaliza o processamento, executando as instruções.
+\end{description}
+
+Na realidade existem outros componentes trabalhando durante o processo de execução de uma instrução, mas eles são irrelevantes ao objetivo deste texto.
+
+\section{Um pouco de vocabulário}
+
+Para tornar as coisas mais claras possível, vamos relembrar e/ou explanar alguns termos de uso comum em computação:
+
+\begin{description}
+
+\item[Endereço] um número que identifica e localiza cada unidade da memória.
+
+\item[Bit] é a unidade mínima de dados, podendo assumir dois valores: 1 ou 0.
+
+\item[Byte] é o nome da unidade mínima de alocação. Na arquitetura x86 possui 8 bits de tamanho podendo aramazenar os números de 0 a 255.
+
+\item[Byte, Word, Double Word e Quad Word] Por razões históricas admite-se que essas palavras significam os tamanhos de dados em computadores, referindo-se 8, 16, 32 e 64 bits respectivamente. Note que o significado da palavra ``word'' neste caso é ligeiramente diferente do significado na expressão ``word machine''.
+
+\item[char, short, int, long, float e double] são nomes de abstrações criadas por linguagens de alto nível para representar tipos de dados. Alguns desses tipos são definidos por \href{http://en.wikipedia.org/wiki/IEEE_754-2008}{normas}, enquanto \href{http://en.wikipedia.org/wiki/Integer_(computer_science)}{outros não}, ficando a cargo da especificação da linguagem
+
+\item[ASCII] é \href{http://en.wikipedia.org/wiki/Character_encoding}{uma das tabelas} utilizadas para converter números em caracteres para serem mostrados na tela \footnote{A tabela ASCII traduz somente os principais caracteres existentes no inglês, onde cada caracter corresponde a um número e vice-versa. Com o advento do Unicode, essa correspondência nem sempre vale. Neste texto vamos ignorar o Unicode para simplificar.}. Como a tabela ASCII é a mais famosa, em geral, quando utilizamos o temo ``ASCII'' estamos nos referindo ao número que representa um determinado caractere nesta tabela.
+
+\item[Tamaho da palavra da máquina] é a quantidade de bits que uma máquina consegue processar por vez. Esse é também o tamanho dos registradores. Quando falamos ``máquina de X bits'' estamos querendo dizer ``máquina cujo tamanho da palavra é X''. Na arquitetura x86 isso define também a quantidade de memória que uma máquina pode endereçar \footnote{Em outras arquiteturas isso pode ser diferente.} (32 bits = $2^{32}$ = 4294967296 endereços).
+
+Note que o computador armazena endereços da mesma forma que um número ordinário. De fato, o computador não sabe a diferença entre um número, um endereço ou um código ASCII. Um número torna-se um caracter quando você o envia par a tela e torna-se um endereço quando você tenta acessar o byte que está naquela posição da memória.
+
+\textbf{Reflita um pouco sobre isso, pois este conceito é crucial para entender commo os programas de computador funcionam.}
+
+\item[Ponteiro] é um endereço armazenado na memória. Esse nome é dado porque ao invés de possuir um ``dado'', nesse caso a memória possui um endereço que ``aponta'' para o dado.
+\end{description}
+
+\section{Interpretando a memória}
+
+Computadores são exatos, portanto os programadores precisam ser igualmente exatos. Se você manda um número para a tela, ao invés de um código ASCII, o computador vai tentar interpretar esse número como ASCII e imprimeir na tela o que ele conseguir. Se você mandar o computador executar uma instrução numa área que só contém dados, ninguém sabe como ele vai interpretar isso, mas certamente ele vai tentar te obedecer.
+
+O ponto é que o computador vai tentar fazer exatamente o que você mandou, não importa se isso faz sentido ou não. Lembre-se que computadores só sabem armazenar números, então letras, imagens, páginas web ou qualquer outra coisa são apenas grandes sequêcias de números, as quais alguns programas em particular conseguem interpretar como algo útil.
+
+\section{Métodos de acesso aos dados}
+
+Os processadores possuem várias formas de acessar os dados que são conhecidas como \emph{modos de endereçamento}.
+
+O modo mais simples é o \emph{modo imediato}, onde o dado é passado na própria instrução. Por exemplo, para inicializar um registrador com 42, ao invés de dar ao processador o endereço onde procurar 42, simplemsmente especificamos o modo imediato e passamos 42.
+
+No \emph{modo de endereçamento de registrador}, a instrução contém o registrador onde está o dado, ao invés de um lugar na memória.
+
+No \emph{modo de endereçamento direto}, a instrução contém um endereço de memória onde está o dado. Podemos pedir por exemplo para o processador carregar o registrador X com o coteúdo da área de memória 0x2010. O computador vai então olhar o que tem dentro da memória 0x2010 e colocar o seu \textbf{conteúdo} no registrador X.
+
+Já no \emph{modo de endereçamento indexado}, a instrução contém um endereço de memória e um \emph{registrador de índice} o qual armazena um offset ou deslocamento para o endereço dos dados. Na arquitetura x86 você pode ainda ter um \emph{multiplicador} para o índice. Por exemplo, se quisermos o dado no quarto byte após o endereço 0x2010, podemos especificar o modo indexado, passar o endereço de base 0x2010, colocar 1 no multiplicador e 3 no índice (lembre-se que em computação contamos a partir do 0), que obteremos o dado no endereço 0x2013.
+
+Temos ainda o \emph{modo de endereçamento indireto} no qual a instrução contém um registrador no qual há um ponteiro (endereço) para o dado na memória.
+
+Finalmente temos o \emph{modo de endereçamento por ponteiro base}, semelhante ao modo indireto exceto a instrução inclui um número para o offseta ser adicionado ao ponteiro base.
+
+\section{Exercícios}
+
+\begin{enumerate}
+
+\item Descreva o ciclo fetch-execute.
+
+\item O que é um registrador? Qual o tamanho dos registradores nas máquians que usamos hoje?
+
+\item Como um computador sabe como interpretar os dados na memória?
+
+\item Qual endereço estamos tentando acessar nos casos abaixo?
+	\begin{enumerate}
+	
+	\item Modo ponteiro base, passando um registrador contendo o endereço 3122 e offset 20.
+	
+	\item Modo indexado, endereço base 6512, registrador de índice contendo 5 e multiplicador contendo 4.
+	
+	\item Modo indexado, endereço base 123472, registrador de índice contendo 0 e multiplicador contendo 4.
+	
+	\item Modo indexado, endereço base 9123478, registrador de índice contendo 20 e multiplicador contendo 1.
+	
+	\end{enumerate}
+
+\item Como o pipelime pode interferir no ciclo fetch-execute?
+
+\item Quais os prós e contras de instruções de tamanho fixo e instruções de tamanho variável?
+
+\end{enumerate}

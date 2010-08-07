@@ -1,0 +1,16 @@
+\begin{thebibliography}{GCC10}
+
+\bibitem[Bar04]{Bartlett}
+Jonathan Bartlett.
+\newblock {\em Programming from the Ground Up}.
+\newblock Bartlett Publishing, Broken Arrow, OK, Julho 2004.
+
+\bibitem[FSF08]{Gfdl}
+Gnu free documentation license.
+\newblock \url{http://www.gnu.org/licenses/fdl.html}, 2008.
+
+\bibitem[GCC10]{Gcc}
+Gcc, the gnu compiler collection.
+\newblock \url{http://gcc.gnu.org}, 2010.
+
+\end{thebibliography}
